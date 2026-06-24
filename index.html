@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bible in a Year — Historical Companion</title>
+<style>
+  :root{
+    --bg:#11100e;
+    --panel:#1c1a16;
+    --panel-2:#24211c;
+    --ink:#f3ece0;
+    --muted:#b3a890;
+    --faint:#8a7f6c;
+    --line:#36312a;
+    --gold:#c9a24b;
+    --gold-soft:#e0c47e;
+    --ot:#7fa6c9;
+    --nt:#c98f7f;
+    --trad:#9bbf8f;
+    --acad:#c2a0cf;
+    --radius:14px;
+    --maxw:1180px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:radial-gradient(1200px 600px at 50% -10%, #1e1b16 0%, var(--bg) 60%);
+    color:var(--ink);
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,"Times New Roman",serif;
+    line-height:1.62;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  header.hero{
+    text-align:center;padding:64px 20px 30px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,rgba(201,162,75,.08),transparent);
+  }
+  .eyebrow{letter-spacing:.32em;text-transform:uppercase;font-size:12px;color:var(--gold);font-family:ui-sans-serif,system-ui,sans-serif;font-weight:600}
+  header.hero h1{font-size:clamp(30px,5vw,52px);margin:.25em 0 .15em;font-weight:600;letter-spacing:.5px}
+  header.hero p{max-width:680px;margin:.4em auto 0;color:var(--muted);font-size:17px}
+  .legend{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:22px;font-family:ui-sans-serif,system-ui,sans-serif;font-size:13px}
+  .legend span{display:inline-flex;align-items:center;gap:7px;color:var(--muted)}
+  .dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .dot.trad{background:var(--trad)} .dot.acad{background:var(--acad)}
+  .dot.ot{background:var(--ot)} .dot.nt{background:var(--nt)}
+
+  /* Controls */
+  .controls{position:sticky;top:0;z-index:30;background:rgba(17,16,14,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 0}
+  .controls .wrap{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-family:ui-sans-serif,system-ui,sans-serif}
+  .search{flex:1;min-width:220px;display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:9px 16px}
+  .search input{flex:1;background:none;border:none;color:var(--ink);font-size:15px;outline:none;font-family:inherit}
+  .search svg{flex:none;opacity:.6}
+  .seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px}
+  .seg button{background:none;border:none;color:var(--muted);padding:7px 14px;border-radius:999px;cursor:pointer;font-size:13px;font-family:inherit;white-space:nowrap;transition:.15s}
+  .seg button.active{background:var(--gold);color:#211c10;font-weight:600}
+  .count{color:var(--faint);font-size:13px;margin-left:auto;white-space:nowrap}
+
+  /* Era sections */
+  .era{margin:46px 0 8px}
+  .era h2{font-size:13px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);font-family:ui-sans-serif,system-ui,sans-serif;font-weight:700;margin:0 0 4px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .era .erdate{color:var(--faint);letter-spacing:.04em;font-size:12px;text-transform:none}
+  .era p.edesc{color:var(--muted);margin:.2em 0 0;font-size:15px;max-width:820px}
+  .era-rule{height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin-top:14px;opacity:.5}
+
+  /* Cards */
+  .grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:border-color .2s, transform .12s}
+  .card:hover{border-color:#4a4337}
+  .card.ot{border-left:4px solid var(--ot)} .card.nt{border-left:4px solid var(--nt)}
+  .card .head{display:flex;align-items:center;gap:16px;padding:16px 20px;cursor:pointer;user-select:none}
+  .num{flex:none;width:38px;height:38px;border-radius:50%;background:var(--panel-2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:ui-sans-serif,system-ui,sans-serif;font-size:14px;color:var(--gold-soft);font-weight:600}
+  .titleblock{flex:1;min-width:0}
+  .titleblock h3{margin:0;font-size:21px;font-weight:600}
+  .titleblock .sub{font-family:ui-sans-serif,system-ui,sans-serif;font-size:12.5px;color:var(--faint);margin-top:2px;display:flex;gap:10px;flex-wrap:wrap}
+  .tag{font-family:ui-sans-serif,system-ui,sans-serif;font-size:11px;letter-spacing:.05em;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+  .chev{flex:none;transition:transform .2s;color:var(--faint)}
+  .card.open .chev{transform:rotate(90deg)}
+  .body{display:none;padding:0 20px 22px;border-top:1px solid var(--line);margin-top:-1px}
+  .card.open .body{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+  .views{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 6px}
+  .view{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .view.trad{border-top:3px solid var(--trad)} .view.acad{border-top:3px solid var(--acad)}
+  .view .vh{font-family:ui-sans-serif,system-ui,sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:8px}
+  .view.trad .vh{color:var(--trad)} .view.acad .vh{color:var(--acad)}
+  .view .row{font-size:14.5px;margin:6px 0}
+  .view .row b{font-weight:600;font-family:ui-sans-serif,system-ui,sans-serif;font-size:12px;letter-spacing:.04em;text-transform:uppercase;display:block;margin-bottom:1px;color:var(--faint)}
+
+  .ctx{margin-top:14px}
+  .ctx h4{font-family:ui-sans-serif,system-ui,sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin:18px 0 6px;display:flex;align-items:center;gap:8px}
+  .ctx p{margin:0 0 10px;font-size:15.5px;color:#e9e1d3}
+  .ctx p:last-child{margin-bottom:0}
+  .ctx .when{font-family:ui-sans-serif,system-ui,sans-serif;font-size:12px;color:var(--faint);margin-bottom:6px;letter-spacing:.02em}
+
+  .nores{text-align:center;color:var(--faint);padding:60px 20px;font-size:18px;display:none}
+
+  footer{border-top:1px solid var(--line);margin-top:60px;padding:30px 20px 60px;text-align:center;color:var(--faint);font-size:13.5px;font-family:ui-sans-serif,system-ui,sans-serif;line-height:1.7}
+  footer a{color:var(--gold-soft)}
+  .toptip{max-width:820px;margin:26px auto 0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px;font-size:14.5px;color:var(--muted);font-family:ui-sans-serif,system-ui,sans-serif}
+  .toptip b{color:var(--gold-soft)}
+
+  @media(max-width:680px){
+    .views{grid-template-columns:1fr}
+    .count{display:none}
+    header.hero{padding-top:44px}
+  }
+  .expand-all{font-family:ui-sans-serif,system-ui,sans-serif;font-size:13px;background:var(--panel);border:1px solid var(--line);color:var(--muted);padding:7px 14px;border-radius:999px;cursor:pointer}
+  .progress-note{font-family:ui-sans-serif,system-ui,sans-serif}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="eyebrow">A Reading Companion</div>
+  <h1>The Bible in a Year</h1>
+  <p>Walk through all 66 books in the order the events happened — with who wrote each book, when, the world the author lived in, and the historical setting of the events themselves.</p>
+  <div class="legend">
+    <span><i class="dot ot"></i> Old Testament</span>
+    <span><i class="dot nt"></i> New Testament</span>
+    <span><i class="dot trad"></i> Traditional view</span>
+    <span><i class="dot acad"></i> Academic view</span>
+  </div>
+  <div class="toptip">
+    <b>How to use this:</b> Books are arranged <b>chronologically by when the events occurred</b>, not by the usual page order — so Job sits beside Genesis, and the prophets are slotted into the kingdom years they spoke into. For each book you get two columns: the <b>traditional</b> attribution held in Jewish &amp; Christian tradition, and the <b>academic/critical</b> view of modern scholarship. Where they agree, the columns will look alike; where they diverge (as with Genesis or Daniel), you'll see both. The two long sections below those columns give you the deep background — the world of the <b>writing</b>, and the world of the <b>events</b>.
+  </div>
+</header>
+
+<div class="controls">
+  <div class="wrap">
+    <label class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="q" type="text" placeholder="Search a book, author, place, or empire…" autocomplete="off">
+    </label>
+    <div class="seg" id="testFilter">
+      <button data-f="all" class="active">All</button>
+      <button data-f="OT">Old Testament</button>
+      <button data-f="NT">New Testament</button>
+    </div>
+    <button class="expand-all" id="toggleAll">Expand all</button>
+    <span class="count" id="count"></span>
+  </div>
+</div>
+
+<main class="wrap" id="app"></main>
+<div class="nores" id="nores">No books match that search.</div>
+
+<footer>
+  <p class="progress-note">Tip: read one book's card the day you start that book in your plan. Tap a card to open it; use the search box to jump to any book, author, or empire (try "Babylon" or "Paul").</p>
+  <p>Dates are scholarly approximations and are debated; "BC/AD" used throughout. Traditional and academic columns are summarized fairly so you can weigh both. This is a study aid, not a substitute for the text itself.</p>
+</footer>
+
+<script>
+/* ---------- DATA: 66 books in events-chronological order ---------- */
+const ERAS = [
+  {id:"primeval", name:"Beginnings & the Patriarchs", date:"Creation – c. 1800 BC", desc:"The primeval history and the founding family of Israel — Abraham, Isaac, Jacob — and a story (Job) set in that same patriarchal world."},
+  {id:"exodus", name:"Exodus & Wilderness", date:"c. 1446 / 1260 – 1400 BC", desc:"Israel leaves Egypt, receives the Law at Sinai, and wanders forty years before reaching the edge of the promised land. (Egypt's New Kingdom is at its height.)"},
+  {id:"conquest", name:"Conquest & the Judges", date:"c. 1400 – 1050 BC", desc:"Israel settles Canaan and lives as a loose tribal confederation governed by 'judges' — a turbulent, decentralized era before kings."},
+  {id:"monarchy", name:"The United Monarchy", date:"c. 1050 – 930 BC", desc:"Saul, David, and Solomon. Israel becomes a kingdom; the temple is built; much of the wisdom and poetic literature is traditionally tied to David and Solomon."},
+  {id:"divided", name:"Divided Kingdom & the Prophets", date:"c. 930 – 586 BC", desc:"The kingdom splits into Israel (north) and Judah (south). Prophets confront kings as Assyria and then Babylon rise. It ends with Jerusalem's fall and exile."},
+  {id:"exile", name:"Exile & Return", date:"c. 605 – 430 BC", desc:"Judah is carried to Babylon, then allowed home under Persia. The temple and walls are rebuilt; the Hebrew scriptures take their settled shape. The Old Testament closes."},
+  {id:"gospels", name:"The Life of Jesus", date:"c. 6/4 BC – AD 30/33", desc:"The four Gospels recount Jesus' birth, ministry, death, and resurrection in Roman-occupied Judea."},
+  {id:"church", name:"The Early Church & the Letters", date:"c. AD 30 – 95", desc:"Acts narrates the church's spread across the Roman Empire; the epistles are letters written into that expansion. Revelation closes the canon."}
+];
+
+const BOOKS = [
+/* ===== 1. PRIMEVAL / PATRIARCHS ===== */
+{n:"Genesis", t:"OT", era:"primeval", genre:"Law / Torah",
+ ta:"Moses", td:"c. 1446–1406 BC (during the wilderness period)",
+ aa:"Multiple sources (J, E, P) compiled by later editors", ad:"Sources c. 950–500 BC; final form in the Persian period",
+ wctx:["The traditional view is that Moses wrote Genesis during Israel's wilderness years, giving a people newly delivered from Egyptian slavery an account of where they came from, why their God had claimed them, and what land had been promised to their ancestors. On this reading, Moses — raised and educated in the literate world of an Egyptian royal household — drew on inherited family memories, oral tradition, and possibly written patriarchal records to compose a single, purposeful narrative.",
+   "The dominant academic view is the Documentary Hypothesis (and its later refinements): Genesis was woven together from several distinct source traditions — conventionally labeled J (which calls God 'Yahweh'), E ('Elohim'), and P (a 'Priestly' source preoccupied with genealogies, covenants, and ritual). These materials were composed across the era of the monarchy and the exile, then stitched into their final form by priestly editors during the Persian period (roughly the 500s–400s BC), when a battered Judah — recently returned from Babylon and living under a foreign empire — urgently needed a charter explaining its identity, its claim to the land, and its relationship to surrounding peoples. The doubled flood details, two creation tellings, and shifting divine names are the classic evidence cited for this layering."],
+ ewhen:"Events: creation to c. 1800 BC",
+ ectx:["The events sweep from creation and the primeval stories (Eden, Cain and Abel, the flood, Babel) into the lives of the patriarchs — Abraham, Isaac, Jacob, and Joseph. Abraham's migration from Ur of the Chaldees toward Canaan fits the early second millennium BC, an age when Mesopotamia was a mosaic of powerful city-states, when the first great law codes (like that of Hammurabi of Babylon, c. 1750 BC) were being carved, and when nomadic and semi-nomadic clans moved along the trade arc of the Fertile Crescent.",
+   "The patriarchal customs in Genesis — a wife giving her servant to her husband to bear children, oral deathbed blessings carrying legal force, the buying of a burial cave with formal negotiation — match what we know of second-millennium Near Eastern social practice. The book closes with Jacob's extended family relocating to Egypt during a regional famine, settling in Goshen under the protection of Joseph, who has risen to power in the Egyptian court. This sets the stage for the centuries of growth — and eventual enslavement — that open Exodus."]},
+
+{n:"Job", t:"OT", era:"primeval", genre:"Wisdom / Poetry",
+ ta:"Moses or an unknown sage (Job himself by some traditions)", td:"Very early — possibly patriarchal era",
+ aa:"Anonymous poet", ad:"Likely 6th–4th c. BC, though the setting is far older",
+ wctx:["No tradition can name the author with confidence; some rabbinic tradition guessed Moses, others an unknown sage, and a few imagined Job recording his own ordeal. What is clear is that the book is a deliberate, highly crafted work of literature — a prose frame (the prologue and epilogue) wrapped around long cycles of soaring Hebrew poetry, some of the most difficult and beautiful in the entire Bible.",
+   "Because Job belongs to the international 'wisdom' tradition and wrestles head-on with the question of innocent suffering, many scholars place the writing during or after the Babylonian exile (the 500s–300s BC), when that question pressed hardest on a people who had lost their land, temple, and king. On this view the author intentionally set the story in a remote, ancient, non-Israelite world — no mention of Moses, the Law, the temple, or Israel at all — so that the problem of suffering could be examined in its purest, most universal form, free of national religious assumptions."],
+ ewhen:"Setting: patriarchal age (no kings, no temple, no Law mentioned)",
+ ectx:["Job lives in 'the land of Uz,' somewhere east of Canaan (often associated with Edom or northern Arabia). His world looks like the patriarchal era of Genesis: wealth is counted in livestock, servants, and children; the head of the household functions as the family priest, offering his own sacrifices; raiders such as the Sabeans and Chaldeans sweep in to plunder herds. There are no kings, no organized nation, and no central sanctuary.",
+   "This deliberately archaic setting matters for reading the book. Job and his friends argue from a strict 'retribution' worldview common across the ancient Near East — the assumption that prosperity proves righteousness and disaster proves guilt. The drama unfolds as that tidy theology collapses under the weight of a genuinely innocent sufferer, and the book refuses easy answers, ending instead with God's overwhelming speeches out of the whirlwind about the vastness and wildness of creation."]},
+
+/* ===== 2. EXODUS / WILDERNESS ===== */
+{n:"Exodus", t:"OT", era:"exodus", genre:"Law / Torah",
+ ta:"Moses", td:"c. 1446–1406 BC",
+ aa:"Composite sources (J, E, P)", ad:"Compiled over centuries; final form post-exile",
+ wctx:["Traditionally this is Moses' own record of the events he personally led — the deliverance from Egypt, the covenant at Sinai, and the building of the tabernacle — written for the very generation that lived them, so that the rescue and the law-giving would never be forgotten.",
+   "Critically, the Exodus narrative is seen as a blend of the same source traditions found in Genesis, with a large block of detailed tabernacle and ritual instruction assigned to the later Priestly source. On this view the foundational story of liberation was told and retold for generations, gathering layers, before being given its final shape after the exile. Whichever view one holds, Exodus became the defining story of Israelite identity — the template through which the nation understood God as a rescuer of slaves and a maker of covenants."],
+ ewhen:"Events: c. 1446 BC (early date) or c. 1260 BC (late date)",
+ ectx:["The book opens generations after Genesis: Joseph is forgotten, and his descendants have become a vast enslaved labor force building store-cities for a hostile pharaoh. The backdrop is Egypt's New Kingdom, the empire at the zenith of its wealth and military power, when massive royal building projects were the norm. Scholars debate two timelines — an 'early date' around 1446 BC, and a 'late date' around 1260 BC that links the pharaoh of the oppression to Rameses II, one of Egypt's longest-reigning and most monumental builders.",
+   "After the ten plagues and the dramatic escape through the sea, Israel travels to Mount Sinai in the wilderness, where the narrative slows to deliver the Ten Commandments, the covenant law, and elaborate plans for the tabernacle — a portable tent-sanctuary. The events thus move from the brick-pits of an imperial superpower to a desert encampment where a ragtag people is being forged into a covenant nation with its own law, worship, and God dwelling in their midst."]},
+
+{n:"Leviticus", t:"OT", era:"exodus", genre:"Law / Torah",
+ ta:"Moses", td:"c. 1446–1406 BC",
+ aa:"Priestly source (P)", ad:"Largely exilic/post-exilic (6th–5th c. BC)",
+ wctx:["The traditional view places Leviticus at Sinai, dictated to Moses as the operating manual for Israel's worship — the sacrifices, the priesthood, the festivals, and the purity laws that would let a holy God dwell safely among an ordinary people.",
+   "Scholars identify nearly all of Leviticus with the Priestly tradition and frequently date its composition to the exile and after, when Israel had lost its temple and the priests were the custodians of a threatened religious identity. In a world where the people could no longer assume access to their land or sanctuary, a precise code of holiness, atonement, and ritual boundaries gave a scattered community a way to remain distinct and faithful. The book's repeated refrain — 'be holy, for I am holy' — reflects that concern with maintaining a separated, consecrated people."],
+ ewhen:"Events: at Mount Sinai, c. 1446/1260 BC",
+ ectx:["The 'events' of Leviticus are almost entirely instructional — it takes place in the single year Israel is camped at the foot of Mount Sinai, with virtually no narrative movement. The setting is the wilderness tabernacle, freshly constructed at the end of Exodus, now needing a system of worship to function.",
+   "The book reflects a world in which sacrifice was the universal language of religion across the ancient Near East, and in which concepts of clean and unclean, holy and common, governed daily life. Its laws on diet, disease, mildew, sexual conduct, and the great Day of Atonement reveal an ancient agrarian society learning to order every dimension of life around the presence of its God. The two narrative interruptions — the deaths of Aaron's sons Nadab and Abihu, and a blasphemer's execution — underline how dangerous and serious that divine nearness was understood to be."]},
+
+{n:"Numbers", t:"OT", era:"exodus", genre:"Law / Torah",
+ ta:"Moses", td:"c. 1446–1406 BC",
+ aa:"Composite (J, E, P)", ad:"Compiled and finalized post-exile",
+ wctx:["Tradition reads Numbers as Moses' record of the long, hard wilderness years — a mix of census lists, travel logs, laws, and dramatic episodes of rebellion, written so future generations would learn from their ancestors' failures.",
+   "Critically the book interleaves narrative from the older sources with census and legal material from the Priestly tradition, assembled into final form well after the events. The English name 'Numbers' comes from the two great censuses that frame the book; the Hebrew name, 'In the Wilderness,' better captures its theme — a generation tested, found wanting, and largely lost in the desert before a new generation is counted and prepared."],
+ ewhen:"Events: the 40 years of wilderness wandering",
+ ectx:["Numbers covers the roughly forty years between Sinai and the borders of Canaan. After organizing the tribes for the march, Israel sends spies into the promised land; ten return terrified, the people refuse to enter, and as judgment the entire adult generation is condemned to die in the wilderness before their children can inherit the land.",
+   "The book is full of the friction of a displaced people on the move — complaints about food and water, challenges to Moses' leadership, plagues, and skirmishes with desert peoples. Toward the end the scene shifts to the plains of Moab, just east of the Jordan, where the strange episode of Balaam the pagan prophet unfolds and where Israel finally stands within sight of the land it had refused decades earlier."]},
+
+{n:"Deuteronomy", t:"OT", era:"exodus", genre:"Law / Torah",
+ ta:"Moses (with the account of his death added)", td:"c. 1406 BC",
+ aa:"The core is the 'D' source", ad:"Core linked to c. 622 BC (Josiah's reform); expanded later",
+ wctx:["Traditionally Deuteronomy is Moses' series of farewell sermons, delivered on the edge of the promised land to a generation that had not personally witnessed the Exodus, restating the covenant before he dies and hands leadership to Joshua. (The account of Moses' own death in the final chapter is widely acknowledged, even in tradition, as a later addition.)",
+   "A landmark scholarly theory connects the legal core of Deuteronomy to the scroll 'found' in the temple during King Josiah's sweeping religious reforms in 622 BC (recounted in 2 Kings 22). On this view, Deuteronomy — with its insistence on worship at a single central sanctuary and its covenant-treaty structure resembling ancient Near Eastern vassal treaties — became the engine of Josiah's reform and the lens through which the books of Joshua through Kings (the 'Deuteronomistic History') were later written and edited."],
+ ewhen:"Events: final month before entering Canaan, c. 1406 BC",
+ ectx:["The setting is a single location and a brief span of time: the plains of Moab, in the last weeks of Moses' life, with Israel poised to cross the Jordan River into Canaan. The wilderness generation is gone; their children, who will actually conquer and settle the land, are the audience.",
+   "The speeches recap the journey from Egypt, retell the law for a new generation, and lay out blessings for obedience and stark curses for unfaithfulness — a covenant framed in the style of the binding treaties great kings imposed on subject peoples in that era. The book ends on the brink of everything: Moses views the land from Mount Nebo, blesses the tribes, and dies, never having entered it himself."]},
+
+/* ===== 3. CONQUEST / JUDGES ===== */
+{n:"Joshua", t:"OT", era:"conquest", genre:"History",
+ ta:"Joshua (with later additions)", td:"c. 1400 BC",
+ aa:"Part of the 'Deuteronomistic History'", ad:"Compiled c. 6th c. BC from older material",
+ wctx:["Tradition credits Joshua himself with most of the book that bears his name, recording the conquest and division of the land he led, with the closing notices of his death added by others.",
+   "Scholars group Joshua with Judges, Samuel, and Kings as the 'Deuteronomistic History' — a continuous narrative shaped by the theology of Deuteronomy and edited into its final form during or after the Babylonian exile. From that vantage point, the conquest stories were retold to make a theological argument to a defeated, exiled people: the land was always a gift conditioned on faithfulness, and just as obedience won it, disobedience would lose it. The book's idealized, sweeping accounts of total conquest sit alongside notices (and the opening of Judges) that the takeover was actually gradual and incomplete."],
+ ewhen:"Events: c. 1400–1375 BC",
+ ectx:["Israel crosses the Jordan and campaigns to take Canaan — the famous fall of Jericho, the defeat at and then capture of Ai, the cunning treaty with the Gibeonites, and battles against coalitions of Canaanite kings. The land is then apportioned among the twelve tribes by lot.",
+   "Canaan in this period was not a unified nation but a patchwork of fortified city-states, each with its own king, loosely under the waning influence of an Egyptian empire stretched thin. This fragmentation helps explain how a confederation of incoming tribes could establish a foothold. The book ends with Joshua's covenant-renewal ceremony at Shechem and his charge to 'choose this day whom you will serve' — a hinge into the unstable centuries that follow."]},
+
+{n:"Judges", t:"OT", era:"conquest", genre:"History",
+ ta:"Samuel (by tradition)", td:"c. 1050–1000 BC",
+ aa:"Deuteronomistic History", ad:"Compiled c. 6th c. BC from older hero-tales",
+ wctx:["Jewish tradition names the prophet Samuel as the compiler, gathering the accounts of the tribal deliverers who arose between Joshua and the monarchy.",
+   "Critically, Judges preserves genuinely old hero-tales and even ancient poetry (the Song of Deborah in chapter 5 is often considered some of the oldest text in the Bible) that were later gathered and framed by the Deuteronomistic editors. They imposed a repeating cycle on the material — the people sin, God hands them to oppressors, they cry out, God raises a deliverer, there is peace, and then they sin again — and bracketed the book with the refrain that 'in those days there was no king in Israel; everyone did what was right in his own eyes,' building the case that Israel needed a king."],
+ ewhen:"Events: c. 1375–1050 BC",
+ ectx:["After Joshua's death, Israel has no central government. For roughly three centuries it lives as a loose confederation of tribes, repeatedly falling under the domination of surrounding peoples — Philistines along the coast, Midianites and Ammonites and Moabites across the borders, and remaining Canaanite powers. In each crisis a charismatic local leader, a 'judge,' rises to rally the tribes and break the oppression.",
+   "The judges are a vivid, flawed gallery: Deborah the prophetess-commander, Gideon with his shrinking army, Jephthah and his tragic vow, and Samson with his superhuman strength and ruinous appetites. The era grows darker as it goes, ending with disturbing accounts of idolatry, civil war, and atrocity that dramatize a society unraveling without unified leadership or consistent faithfulness."]},
+
+{n:"Ruth", t:"OT", era:"conquest", genre:"History / Narrative",
+ ta:"Samuel (by tradition)", td:"c. 1000 BC",
+ aa:"Anonymous", ad:"Often dated post-exile (5th c. BC)",
+ wctx:["Tradition again points to Samuel as author of this short, luminous story, in part because it ends with a genealogy leading to David, whom Samuel anointed.",
+   "Many scholars instead read Ruth as a later, polished short story, and some date it to the post-exilic period as a quiet counter-voice in the era of Ezra and Nehemiah, when foreign marriages were being condemned. In that context a narrative whose heroine is a loyal, faithful Moabite woman — the great-grandmother of King David himself — would make a pointed theological argument that genuine faith and covenant loyalty matter more than ethnic boundaries."],
+ ewhen:"Events: 'in the days when the judges ruled,' c. 1100 BC",
+ ectx:["The story is explicitly set 'in the days when the judges ruled,' against the backdrop of a famine that drives an Israelite family from Bethlehem to neighboring Moab. It offers an intimate, domestic counterpoint to the violence of Judges: ordinary people navigating loss, loyalty, and survival.",
+   "It vividly illustrates several institutions of ancient Israelite agrarian life — gleaning, by which the poor were entitled to harvest the edges of fields; the kinsman-redeemer, a relative obligated to protect a family's land and line; and levirate-style marriage to preserve a dead man's name. Ruth's faithfulness and Boaz's generosity land her, a foreign widow, in the royal ancestry of Israel, closing with the line that runs to David."]},
+
+/* ===== 4. UNITED MONARCHY ===== */
+{n:"1 Samuel", t:"OT", era:"monarchy", genre:"History",
+ ta:"Samuel, Nathan, and Gad (by tradition)", td:"c. 1000–900 BC",
+ aa:"Deuteronomistic History", ad:"Compiled c. 6th c. BC from court records",
+ wctx:["Tradition assigns the books of Samuel to the prophets Samuel, Nathan, and Gad — figures who appear within the narrative — with Samuel responsible for the early portion.",
+   "Scholars see Samuel as part of the Deuteronomistic History, drawing on what appear to be very early sources, including prophetic traditions and royal court records, later edited together. The book carries a notable internal tension between passages that view the demand for a king as a faithless rejection of God's direct rule and passages that present kingship as God's gracious provision — a tension scholars attribute to the blending of differing sources and viewpoints about the monarchy."],
+ ewhen:"Events: c. 1100–1010 BC",
+ ectx:["This is the pivot from the era of judges to monarchy. It opens with Samuel — prophet, priest, and last of the judges — and traces Israel's demand for a king 'like all the nations,' driven largely by the relentless military pressure of the Philistines, a technologically advanced people who held a monopoly on ironworking.",
+   "Samuel anoints Saul as Israel's first king, but Saul's reign sours through disobedience and paranoia. Samuel then secretly anoints the shepherd boy David, who bursts onto the scene by killing the Philistine champion Goliath. The rest of the book follows the deadly rivalry between the jealous, declining Saul and the rising, popular David, ending with Saul's death in battle on Mount Gilboa."]},
+
+{n:"2 Samuel", t:"OT", era:"monarchy", genre:"History",
+ ta:"Nathan and Gad (by tradition)", td:"c. 1000–900 BC",
+ aa:"Deuteronomistic History (incl. early 'Court History')", ad:"Compiled c. 6th c. BC; some material very early",
+ wctx:["Traditionally the work of David's court prophets Nathan and Gad, who witnessed his reign firsthand.",
+   "Critically, 2 Samuel contains what many regard as some of the oldest sustained historical writing in the Bible — the so-called 'Succession Narrative' or 'Court History' of David (often spanning 2 Samuel into the opening of 1 Kings). Its psychological depth, candor about David's crimes and his family's dysfunction, and apparent eyewitness detail lead scholars to think it preserves a remarkably early and unflinching royal chronicle, later folded into the Deuteronomistic History."],
+ ewhen:"Events: c. 1010–970 BC",
+ ectx:["The book chronicles David's roughly forty-year reign. He unites the northern and southern tribes, captures the Jebusite stronghold of Jerusalem and makes it his neutral capital, brings the Ark there, and receives God's promise of an enduring dynasty (the 'Davidic covenant'). His military campaigns expand Israel into a regional power.",
+   "But the second half turns dark with David's adultery with Bathsheba and the murder of her husband Uriah — a turning point after which 'the sword never departs' from his house. The consequences cascade into rape, fratricide, and the armed rebellion of his son Absalom. The portrait is strikingly honest: Israel's greatest king is shown as both deeply faithful and gravely flawed, and the kingdom's later troubles trace back to this household."]},
+
+{n:"1 Chronicles", t:"OT", era:"monarchy", genre:"History",
+ ta:"Ezra (by tradition)", td:"c. 450–430 BC",
+ aa:"Anonymous 'Chronicler'", ad:"c. 400–350 BC",
+ wctx:["Both tradition (which often names Ezra) and modern scholarship agree that Chronicles is a late, post-exilic work — written for the community that had returned from Babylon and was rebuilding its life around the Second Temple. Though it narrates events from David's era five centuries earlier, it is composed from the vantage point of a small province under Persian rule.",
+   "The anonymous 'Chronicler' retells the story already told in Samuel–Kings, but with a different agenda: where Samuel–Kings explains the catastrophe of exile, Chronicles reassures a struggling restoration community of its continuity with the glorious past. It largely omits David's sins and the northern kingdom, foregrounds the temple, the priesthood, and proper worship, and presents an idealized, encouraging vision of national identity centered on Jerusalem."],
+ ewhen:"Events: genealogies from Adam, then David's reign (c. 1010–970 BC)",
+ ectx:["The book opens with nine chapters of genealogies stretching all the way back to Adam — a way of locating the post-exilic community within the entire human and national story and reaffirming the tribal and priestly lines. It then narrates David's reign with a sharp focus: his bringing of the Ark to Jerusalem and, above all, his extensive preparations for the temple his son Solomon would build.",
+   "Because it is written for people who can no longer take their land, temple, or autonomy for granted, the events are presented as a charter for present-day worship. The detailed attention to Levites, musicians, gatekeepers, and temple organization speaks directly to the concerns of a community trying to re-establish proper worship in a rebuilt but modest temple under imperial oversight."]},
+
+{n:"Psalms", t:"OT", era:"monarchy", genre:"Wisdom / Poetry",
+ ta:"David (73 psalms), plus Asaph, sons of Korah, Solomon, Moses, others", td:"c. 1000–400 BC",
+ aa:"Many authors over centuries", ad:"c. 1000–300 BC; collected gradually",
+ wctx:["The Psalter is not a single composition but Israel's collected hymnbook and prayer book, gathered over many centuries. Tradition centers it on David, 'the sweet singer of Israel,' to whom 73 psalms are attributed by their superscriptions, with others ascribed to the temple guilds of Asaph and the sons of Korah, and individual psalms to Solomon and even Moses.",
+   "Scholars agree the collection grew organically: some psalms may indeed reach back to the early monarchy, while others clearly reflect the trauma of the Babylonian exile (Psalm 137, 'by the rivers of Babylon') and the concerns of the post-exilic temple. The 150 psalms were eventually arranged into five 'books,' echoing the five books of Moses, and given a final shape as Israel's worship literature — songs meant to be sung, prayed, and used liturgically across generations."],
+ ewhen:"Spans the whole Old Testament era",
+ ectx:["The psalms voice the full emotional and historical range of ancient Israel's life with God: royal coronation hymns from the monarchy, individual and communal laments wrung from war and illness and betrayal, songs of ascent sung by pilgrims climbing to Jerusalem, raw cries of grief from exile, and exuberant temple praise.",
+   "Reading them historically means hearing many different settings at once — a king before battle, a sick man near death, a refugee mourning a fallen city, a worshiper overwhelmed at a festival. They give us the inner life behind the events recorded elsewhere: not just that David fled Absalom or that Jerusalem fell, but how it felt to live through such things while still reaching toward God."]},
+
+{n:"Proverbs", t:"OT", era:"monarchy", genre:"Wisdom / Poetry",
+ ta:"Solomon (with sayings of Agur, Lemuel, and 'the wise')", td:"c. 950–700 BC",
+ aa:"Multiple collections", ad:"Collected c. 10th–5th c. BC; edited post-exile",
+ wctx:["Tradition credits Solomon, remembered as the wisest king and a prolific composer of proverbs, as the fountainhead of the book — though Proverbs itself names other contributors, including 'the wise,' Agur, and King Lemuel, and notes that some sayings were copied out later 'by the men of Hezekiah.'",
+   "Scholars see Proverbs as an anthology of several distinct collections assembled and edited over a long span, with the extended poetic introduction (chapters 1–9) and the closing portrait of the 'woman of valor' likely added last as a frame. The internal note about Hezekiah's scribes is itself evidence of an ongoing editorial process across the monarchy and beyond."],
+ ewhen:"Setting: Israel's wisdom tradition, height under Solomon (c. 950 BC)",
+ ectx:["Proverbs reflects the courtly, cosmopolitan wisdom culture that flourished during the monarchy. 'Wisdom' was an international enterprise across the ancient Near East — Egypt and Mesopotamia produced their own instruction literature, and there are striking parallels between a section of Proverbs and the Egyptian 'Instruction of Amenemope.' Solomon's court, with its wealth and foreign contacts, was exactly the kind of setting in which such teaching was prized.",
+   "The content is intensely practical, training the young in the skills of living well: speech, money, work, friendship, sexual fidelity, humility, and justice, all grounded in 'the fear of the LORD.' It captures the everyday texture of ancient life — the marketplace, the city gate, the household, the dangers of the streets at night — and packages hard-won experience into memorable, transmittable lines."]},
+
+{n:"Ecclesiastes", t:"OT", era:"monarchy", genre:"Wisdom / Poetry",
+ ta:"Solomon ('the Preacher, son of David')", td:"c. 935 BC",
+ aa:"Anonymous sage ('Qoheleth')", ad:"Late — c. 3rd c. BC (Persian/Hellenistic period)",
+ wctx:["Traditionally read as Solomon's disillusioned, late-life reflection — the same king who had everything (wealth, wisdom, pleasure, power) confessing that all of it was 'vanity' apart from God. The narrator's self-description as 'son of David, king in Jerusalem' encourages the Solomonic reading.",
+   "Most scholars, however, date the writing centuries later — to the Persian or early Hellenistic period (roughly the 400s–200s BC) — on the basis of its distinctive late Hebrew, its loanwords, and its philosophical, almost skeptical tone, which resonates with the intellectual currents of that age. On this view an unnamed sage (the Hebrew title 'Qoheleth' means something like 'the Assembler' or 'Preacher') adopts the persona of a Solomon-like king to explore, with unusual candor, the limits of human wisdom."],
+ ewhen:"Setting: a king in Jerusalem reflecting on a full life",
+ ectx:["The book is staged as the reflections of a supremely privileged figure who has tried everything life offers — grand building projects, gardens and vineyards, silver and gold, music, pleasure, and the relentless pursuit of wisdom — and found that none of it finally satisfies in the face of death, which comes to wise and foolish alike.",
+   "Whether heard as Solomon's twilight or a later philosopher's experiment, it speaks from a settled, prosperous society wrestling with meaning rather than survival. Its honest grappling with mortality, injustice, and the apparent randomness of life is unusually modern in tone, and it lands on a sober counsel: enjoy the simple gifts of food, work, and companionship as gifts from God, and 'fear God and keep his commandments.'"]},
+
+{n:"Song of Solomon", t:"OT", era:"monarchy", genre:"Wisdom / Poetry",
+ ta:"Solomon", td:"c. 950 BC",
+ aa:"Anonymous", ad:"Likely post-exilic (collected love poetry)",
+ wctx:["Tradition attributes this collection of love poetry to Solomon, to whom 1,005 songs were credited, and whose name appears in its opening line and throughout.",
+   "Many scholars instead see a later anthology of love poems, pointing to vocabulary (including apparent Persian and Greek loanwords) that suggests a post-exilic date, with Solomon's name attached honorifically. Throughout Jewish and Christian history the book has been read on two levels: as a frank and joyful celebration of romantic and sexual love between a man and a woman, and allegorically as a picture of the love between God and his people (or Christ and the church) — a dual reading that helps explain its place in the canon."],
+ ewhen:"Setting: royal court of Solomon",
+ ectx:["The poetry unfolds amid the lush imagery of the land and the luxury of Solomon's court — vineyards and gardens, spices and perfumes, flocks and orchards, the scenery of springtime in ancient Israel. Two lovers express their longing, delight, and devotion in alternating voices, with a chorus (the 'daughters of Jerusalem') punctuating the exchange.",
+   "Set against the wealth and abundance associated with Solomon's golden age, it offers a rare biblical window into the celebration of human love and desire as good. Its imagery draws on the agricultural and sensory world of the ancient Near East, where such love poetry had parallels in Egyptian song, and it stands in the canon as a testament that romantic love is part of the created order worth singing about."]},
+
+{n:"1 Kings", t:"OT", era:"monarchy", genre:"History",
+ ta:"Jeremiah (by tradition)", td:"c. 560–540 BC",
+ aa:"Deuteronomistic History", ad:"Compiled in/after the exile (6th c. BC)",
+ wctx:["Jewish tradition names the prophet Jeremiah as author of Kings, a fitting choice since the book's perspective is steeped in the prophetic critique of unfaithful kings.",
+   "Scholars place the final edition of Kings during the Babylonian exile, written from the ashes to answer the agonizing question of how God's chosen people had lost everything. The Deuteronomistic editors evaluate each king by a single standard — faithfulness to the LORD and to centralized, pure worship — and they draw on named sources like 'the book of the annals of the kings of Israel/Judah.' The result is theological history: a sustained argument that the disasters that befell both kingdoms were the covenant consequences of persistent idolatry."],
+ ewhen:"Events: c. 970–850 BC",
+ ectx:["The book opens at the height of the monarchy: the aged David's succession secured by Solomon, whose reign brings unprecedented wealth, wisdom, international prestige, and above all the building of the magnificent Jerusalem temple. But Solomon's foreign marriages and idolatry sow decline, and after his death the kingdom tears in two — ten northern tribes (Israel) under Jeroboam, and Judah in the south under the Davidic line.",
+   "The narrative then alternates between the two kingdoms, cataloguing a parade of mostly faithless kings. The northern dynasty of Omri and his son Ahab — and Ahab's notorious queen Jezebel, who promotes Baal worship — becomes the stage for the dramatic ministry of the prophet Elijah, including his showdown with the prophets of Baal on Mount Carmel. The world here is one of rival kingdoms maneuvering among larger neighbors, with prophets serving as the conscience confronting royal power."]},
+
+{n:"2 Chronicles", t:"OT", era:"monarchy", genre:"History",
+ ta:"Ezra (by tradition)", td:"c. 450–430 BC",
+ aa:"Anonymous 'Chronicler'", ad:"c. 400–350 BC",
+ wctx:["Like 1 Chronicles, this is a post-exilic retelling, traditionally linked to Ezra and critically to the anonymous Chronicler, composed for the restoration community living under Persia. It continues the same project: reframing the monarchy's story around the temple and proper worship for people rebuilding their religious life.",
+   "Because its purpose is to encourage and instruct rather than to chronicle exhaustively, 2 Chronicles concentrates almost entirely on the southern kingdom of Judah and the Davidic line (the legitimate temple line), largely ignoring the northern kingdom. It highlights reforming kings, celebrates moments of repentance and revival, and repeatedly shows that seeking God brings blessing while abandoning him brings ruin — a message tailored to a community deciding how to live faithfully after exile."],
+ ewhen:"Events: Solomon's reign through the fall of Jerusalem (c. 970–586 BC), ending with the Persian decree",
+ ectx:["The narrative runs from Solomon's reign and the building of the temple through the long line of Judah's kings down to the Babylonian destruction of Jerusalem in 586 BC. It lingers on the great reformers — Asa, Jehoshaphat, Hezekiah, and especially Josiah — and their efforts to purge idolatry and restore temple worship.",
+   "The events thus span the rise and fall of the southern kingdom against the backdrop of shifting superpowers: Egypt, Assyria, and finally Babylon. The book ends not in total despair but with a forward glance — the decree of Cyrus of Persia (538 BC) permitting the exiles to return and rebuild the house of God in Jerusalem, the very hope that animated the Chronicler's own community."]},
+
+/* ===== 5. DIVIDED KINGDOM / PROPHETS ===== */
+{n:"Jonah", t:"OT", era:"divided", genre:"Prophet (Minor)",
+ ta:"Jonah", td:"c. 780–760 BC",
+ aa:"Anonymous author writing about Jonah", ad:"Likely post-exilic (5th–4th c. BC)",
+ wctx:["Traditionally taken as the prophet Jonah's own account of his reluctant mission, with Jonah being a real 8th-century figure mentioned briefly in 2 Kings as active during the reign of Jeroboam II.",
+   "Many scholars read Jonah as a later didactic story — possibly post-exilic — that uses the historical prophet as a character to make a pointed theological argument. Its tone (satirical, almost comic), its theme (God's mercy reaching even Israel's worst enemy), and certain linguistic features suggest a date well after Jonah's lifetime, perhaps during the Persian period, when questions about Israel's relationship to the surrounding nations were live. Unlike other prophetic books, it contains almost no oracles — it is a narrative about a prophet rather than a collection of his preaching."],
+ ewhen:"Events: c. 780–760 BC, reign of Jeroboam II",
+ ectx:["The story sends Jonah to Nineveh, the great city of Assyria, the rising and notoriously brutal empire that would later destroy Jonah's own northern kingdom. Jonah's flight in the opposite direction — toward Tarshish, at the far western edge of the known world — and his anger when Nineveh repents reveal a prophet who would rather see his nation's enemy destroyed than spared.",
+   "Set in the prosperous reign of Jeroboam II, when Israel enjoyed a temporary resurgence, the book dramatizes the scandal of divine compassion crossing national and ethnic lines. The famous episode of the great fish, the repentance of an entire pagan city, and the lesson of the withered plant all serve a single point: that God's mercy is wider than his prophet — or his people — would like it to be."]},
+
+{n:"Amos", t:"OT", era:"divided", genre:"Prophet (Minor)",
+ ta:"Amos, a shepherd of Tekoa", td:"c. 760–750 BC",
+ aa:"Amos, with later editorial additions", ad:"Core c. 760 BC; edited later",
+ wctx:["Amos is widely accepted, by tradition and scholarship alike, as among the earliest of the 'writing prophets.' He was not a professional prophet but a shepherd and tender of sycamore-figs from Tekoa in the southern kingdom of Judah, called by God to go and preach in the northern kingdom of Israel.",
+   "Scholars recognize a genuine 8th-century core of Amos's oracles, with some later editorial touches (such as the hopeful closing verses, which some attribute to a post-exilic hand). His book is a model of prophetic indictment, building from oracles against surrounding nations to a devastating turn on Israel itself."],
+ ewhen:"Events: c. 760 BC, reign of Jeroboam II",
+ ectx:["Amos preaches during the long, prosperous reign of Jeroboam II in the north, a time of military success and booming wealth — but a prosperity built on the backs of the poor. He thunders against the comfortable elite who 'sell the righteous for silver and the needy for a pair of sandals,' who lounge on ivory beds while exploiting the vulnerable, and who mdistort religion into empty ritual.",
+   "His message is that economic injustice and social cruelty make Israel's worship offensive to God, and that judgment is coming despite the surface prosperity. Within a generation of his preaching, the Assyrian empire would indeed sweep down and destroy the northern kingdom (722 BC), making Amos's warnings tragically prophetic. His cry, 'let justice roll down like waters,' became one of the Bible's enduring calls for social righteousness."]},
+
+{n:"Hosea", t:"OT", era:"divided", genre:"Prophet (Minor)",
+ ta:"Hosea", td:"c. 755–710 BC",
+ aa:"Hosea, with later additions", ad:"Core late 8th c. BC",
+ wctx:["Accepted as the words of Hosea, the only one of the writing prophets who was himself a native of the northern kingdom and preached primarily to it. His oracles were later collected and lightly edited, likely by a southern (Judahite) hand that preserved them after the north fell.",
+   "Hosea's book is famous for its searing emotional intensity and for the prophet's own marriage being made into a living sermon: God commands him to marry Gomer, an unfaithful woman, so that his heartbreak over her betrayals might embody God's anguished love for an unfaithful Israel."],
+ ewhen:"Events: c. 750–722 BC, the north's final decades",
+ ectx:["Hosea prophesies during the chaotic last decades of the northern kingdom, after the stability of Jeroboam II collapsed into a rapid succession of kings, several of them assassinated. Israel lurched between appeasing Assyria and conspiring with Egypt, while idolatry — especially the worship of Baal — was rampant.",
+   "Against this backdrop of political instability and religious betrayal, Hosea's central metaphor is marital unfaithfulness: Israel is the adulterous spouse, chasing other gods and foreign alliances. Yet the book pulses with God's wounded tenderness and refusal to finally let go ('How can I give you up, O Ephraim?'). The events culminate in the very judgment Hosea foresaw — Assyria's destruction of Samaria and the northern kingdom in 722 BC."]},
+
+{n:"Isaiah", t:"OT", era:"divided", genre:"Prophet (Major)",
+ ta:"Isaiah of Jerusalem", td:"c. 740–680 BC",
+ aa:"Isaiah (ch. 1–39) plus later prophets ('Second/Third Isaiah,' ch. 40–66)", ad:"c. 740–500 BC across three layers",
+ wctx:["Tradition holds that the whole book is the work of one man — Isaiah, son of Amoz, an aristocratic prophet with access to the royal court of Judah, active across the reigns of several kings in the late 8th century. On this view his prophecies, including detailed predictions of the Babylonian exile and return long before they happened, demonstrate genuine foresight.",
+   "Most modern scholars divide the book into at least three layers: 'First Isaiah' (chapters 1–39), the 8th-century prophet's own ministry; 'Second Isaiah' (chapters 40–55), the work of an anonymous prophet writing to the exiles in Babylon around 540 BC, who names the Persian king Cyrus and announces imminent return; and 'Third Isaiah' (chapters 56–66), addressing the community after the return. The shift in setting, tone, and concerns across these sections is the main basis for this view. Either way, Isaiah is one of the most theologically rich and influential books in scripture."],
+ ewhen:"Events: c. 740–686 BC (with later chapters envisioning the exile and return)",
+ ectx:["The first half is set in 8th-century Jerusalem as the Assyrian empire devours the region. Isaiah counsels kings Ahaz and Hezekiah, urging trust in God rather than in foreign alliances. The dramatic high point is Assyria's siege of Jerusalem under Sennacherib (701 BC), when the city is miraculously spared — even as the northern kingdom has already been destroyed.",
+   "The later chapters look far past Isaiah's lifetime to a different crisis: the Babylonian exile and the longed-for return under Persia. They contain some of the Bible's most exalted poetry — the comfort of 'a voice crying in the wilderness,' the universal vision of nations streaming to Zion, and the haunting 'Servant Songs' about a suffering servant who bears the sins of many, texts later read by Christians as pointing to Christ."]},
+
+{n:"Micah", t:"OT", era:"divided", genre:"Prophet (Minor)",
+ ta:"Micah of Moresheth", td:"c. 735–700 BC",
+ aa:"Micah, with later additions", ad:"Core late 8th c. BC",
+ wctx:["Accepted as the prophet Micah, a younger contemporary of Isaiah, but from a very different vantage point: where Isaiah moved among the Jerusalem elite, Micah came from Moresheth, a small town in the rural lowlands, and spoke as a voice from the countryside against the capital's corruption. Some later material was likely added to his core oracles.",
+   "His book alternates sharp oracles of judgment with promises of restoration, and includes some of the most quoted lines in the prophets — the prediction of a ruler from Bethlehem and the summary of true religion: 'to do justice, and to love kindness, and to walk humbly with your God.'"],
+ ewhen:"Events: c. 735–700 BC",
+ ectx:["Micah prophesies during the same turbulent Assyrian crisis as Isaiah, as the empire crushes the northern kingdom and threatens Judah. From his rural perspective he denounces the way Jerusalem's and Samaria's wealthy elites — landgrabbers, dishonest merchants, corrupt judges, and venal priests and prophets — exploited ordinary farming families.",
+   "He foresees judgment falling on both capitals, even daring to predict Jerusalem's destruction. Yet he also looks beyond catastrophe to hope: a remnant restored, a coming ruler born in little Bethlehem, and a future age when nations 'beat their swords into plowshares.' His blend of fierce social critique and tender hope makes him a kind of country-cousin counterpart to Isaiah."]},
+
+{n:"2 Kings", t:"OT", era:"divided", genre:"History",
+ ta:"Jeremiah (by tradition)", td:"c. 560–540 BC",
+ aa:"Deuteronomistic History", ad:"Compiled in/after the exile (6th c. BC)",
+ wctx:["The continuation of 1 Kings, traditionally credited to Jeremiah and critically to the Deuteronomistic editors, finalized during the exile. Originally Kings was a single scroll, divided only later.",
+   "Written from the perspective of national catastrophe, 2 Kings is the climax of the long argument running from Joshua onward: that the loss of land, monarchy, and temple was the inevitable covenant consequence of generations of idolatry and injustice that prophets had repeatedly warned against. The editors weave together prophetic narratives and royal annals to make this case to a stunned, exiled people."],
+ ewhen:"Events: c. 850–560 BC",
+ ectx:["The book follows the parallel histories of the two kingdoms toward their ends. It opens with the dramatic ministry of the prophet Elisha, successor to Elijah, full of miracles and confrontations with kings. Then it tracks the relentless advance of empire: Assyria conquers the northern kingdom and deports its people in 722 BC, scattering the 'ten lost tribes.'",
+   "Judah survives more than a century longer, through reformer kings like Hezekiah and Josiah and wicked ones like Manasseh, until the new superpower, Babylon under Nebuchadnezzar, besieges and destroys Jerusalem and its temple in 586 BC, carrying the leading citizens into exile. The book ends in Babylon with a faint flicker of hope: the exiled king Jehoiachin released from prison and given a seat at the Babylonian table — the Davidic line preserved, barely."]},
+
+{n:"Joel", t:"OT", era:"divided", genre:"Prophet (Minor)",
+ ta:"Joel", td:"c. 835 BC (early) or 9th–5th c. (debated)",
+ aa:"Joel", ad:"Often dated post-exilic (c. 400 BC)",
+ wctx:["The book is attributed to the prophet Joel, son of Pethuel, but it provides almost no datable historical markers — no king is named, no specific foreign empire is the central threat — which makes Joel one of the most difficult books in the Bible to date. Proposals range across more than four centuries.",
+   "Some place him early (around 835 BC), making him one of the first writing prophets; many scholars favor a post-exilic date (around 400 BC), partly because the book seems to presuppose a functioning temple in a small, restored community and references that fit the later period. It is placed here among the prophets primarily by theme rather than by a secure date."],
+ ewhen:"Setting: a locust plague used as a sign of 'the Day of the LORD'",
+ ectx:["The occasion is a catastrophic locust invasion — wave upon wave of insects stripping the land bare — which Joel treats as both a literal agricultural disaster and a vivid sign of divine judgment. In an agrarian society, such a plague meant ruined crops, failed offerings, and the threat of famine, a fitting image for a coming 'Day of the LORD.'",
+   "Joel calls the whole community to repentance — to 'rend your hearts and not your garments' — and then promises restoration: the land healed, the years the locusts ate repaid, and, most famously, the outpouring of God's Spirit 'on all flesh,' a passage the apostle Peter would later quote at Pentecost. The book moves from local devastation to a cosmic horizon of judgment and renewal."]},
+
+{n:"Nahum", t:"OT", era:"divided", genre:"Prophet (Minor)",
+ ta:"Nahum of Elkosh", td:"c. 663–612 BC",
+ aa:"Nahum", ad:"Late 7th c. BC",
+ wctx:["Accepted as the prophet Nahum, from the otherwise unknown town of Elkosh. The book can be dated fairly closely because it refers to the fall of the Egyptian city of Thebes (663 BC) as a past event and anticipates the fall of Nineveh (612 BC) as still future — placing it firmly in the late 7th century.",
+   "Nahum is essentially a single, sustained poem — a war oracle of stunning literary power — announcing the doom of Nineveh, capital of Assyria."],
+ ewhen:"Events: c. 630–612 BC",
+ ectx:["For over a century, Assyria had been the terror of the ancient Near East — the empire that destroyed the northern kingdom of Israel, besieged Jerusalem, and ruled through mass deportation and calculated brutality. Nahum's audience in Judah had lived under the shadow of this superpower for generations.",
+   "Nahum's poem is a thunderous announcement that the tyrant's time is up: Nineveh, the 'bloody city,' will fall, and its fall will be the relief of all who suffered under it. Where Jonah had earlier seen Nineveh repent and be spared, Nahum sees its final reckoning. The prophecy was fulfilled in 612 BC, when a coalition of Babylonians and Medes sacked Nineveh and ended the Assyrian empire — a geopolitical earthquake that cleared the way for Babylon's rise."]},
+
+{n:"Zephaniah", t:"OT", era:"divided", genre:"Prophet (Minor)",
+ ta:"Zephaniah", td:"c. 640–620 BC",
+ aa:"Zephaniah", ad:"Late 7th c. BC, with later additions",
+ wctx:["Accepted as the prophet Zephaniah, who is given an unusually long genealogy reaching back four generations to a 'Hezekiah' — possibly the king, which would make him of royal blood. The book itself dates his ministry to the reign of King Josiah of Judah.",
+   "His preaching likely helped fuel, or at least accompanied, Josiah's famous religious reforms. Some later editorial additions are commonly recognized, but the core is firmly seventh-century."],
+ ewhen:"Events: c. 640–609 BC, reign of Josiah",
+ ectx:["Zephaniah prophesies in Judah during the reign of the reformer-king Josiah, a window between the long, idolatrous reign of Manasseh and the looming Babylonian threat. Assyria is weakening but not yet fallen, and Judah is riddled with syncretistic worship — people hedging their bets by serving both the LORD and astral and pagan deities.",
+   "His central theme is 'the Day of the LORD,' a sweeping day of judgment that will fall not only on Judah for its idolatry and complacency (those 'who say in their hearts, the LORD will do nothing') but on the surrounding nations as well. Yet the book ends with one of the tenderest promises in the prophets: a purified remnant, and God himself rejoicing over his people with singing."]},
+
+{n:"Habakkuk", t:"OT", era:"divided", genre:"Prophet (Minor)",
+ ta:"Habakkuk", td:"c. 609–598 BC",
+ aa:"Habakkuk", ad:"Late 7th c. BC",
+ wctx:["Accepted as the prophet Habakkuk, writing in the brief, tense window after Assyria's collapse and Babylon's emergence as the dominant power — most likely between 609 and 598 BC.",
+   "The book is unusual in form: rather than delivering oracles to the people, it records a frank dialogue between the prophet and God, in which Habakkuk dares to question divine justice and receives unsettling answers. It closes with a magnificent psalm of trust."],
+ ewhen:"Events: c. 609–598 BC",
+ ectx:["Habakkuk wrestles with a real moral crisis of his moment. First he protests the violence and injustice he sees within Judah and asks why God does nothing. God answers that he is raising up the Babylonians (the 'Chaldeans') as his instrument of judgment — which only deepens the prophet's anguish: how can a holy God use a nation even more wicked than Judah to punish his people?",
+   "The reply Habakkuk receives — that the proud will fall but 'the righteous shall live by his faith' — became one of the most theologically important lines in the Bible, later quoted by Paul and central to the Reformation. The book captures the spiritual vertigo of living in a moment when one brutal empire is replacing another and the faithful must learn to trust God amid geopolitical terror they cannot control."]},
+
+{n:"Jeremiah", t:"OT", era:"divided", genre:"Prophet (Major)",
+ ta:"Jeremiah (dictated to his scribe Baruch)", td:"c. 627–580 BC",
+ aa:"Jeremiah with extensive later editing", ad:"Core c. 600 BC; expanded through the exile",
+ wctx:["Tradition holds that the book records the oracles and life of Jeremiah, dictated over decades to his faithful scribe Baruch (the book even narrates a scroll being written, read to the king, and defiantly burned, then rewritten and expanded).",
+   "Scholars affirm a substantial Jeremiah core but see extensive later editing and arrangement; notably, the ancient Greek (Septuagint) version of Jeremiah is significantly shorter than and ordered differently from the standard Hebrew text, which is taken as evidence that the book circulated in more than one edition and grew over time. It interweaves poetry, prose sermons, and biographical narrative."],
+ ewhen:"Events: c. 627–586 BC and after",
+ ectx:["Jeremiah's roughly forty-year ministry spans Judah's final, doomed decades — from the reforms of Josiah through the chaos that followed, as Babylon tightened its grip. Called the 'weeping prophet,' he warned relentlessly that resistance to Babylon was futile and that the city would fall, urging surrender as God's will. For this he was branded a traitor, beaten, imprisoned, thrown into a cistern, and constantly threatened.",
+   "He lived to see his warnings vindicated in the horror of Jerusalem's destruction in 586 BC, and was eventually dragged off to Egypt by fleeing survivors. Amid the gloom, his message also contained extraordinary hope — the promise of a 'new covenant' written on the heart, and the assurance that after seventy years the exiles would return. His personal laments and confessions make him the most emotionally exposed of all the prophets."]},
+
+{n:"Lamentations", t:"OT", era:"divided", genre:"Wisdom / Poetry",
+ ta:"Jeremiah", td:"c. 586 BC",
+ aa:"Anonymous eyewitness poet(s)", ad:"Soon after 586 BC",
+ wctx:["Tradition attributes these five funeral poems to Jeremiah, the prophet who witnessed and foretold Jerusalem's fall, and the book is positioned right after his in many Bibles for that reason.",
+   "Scholars generally treat the poems as anonymous but agree they were composed by an eyewitness (or eyewitnesses) very shortly after the catastrophe of 586 BC, while the trauma was raw. The book is a literary tour de force: the first four chapters are intricate acrostics, each verse or set of verses beginning with successive letters of the Hebrew alphabet — an ordered form holding together the rawest grief."],
+ ewhen:"Events: immediately after Jerusalem's fall, 586 BC",
+ ectx:["The poems mourn the destruction of Jerusalem by Babylon — the burning of the temple, the breaching of the walls, the starvation during the siege so severe that it drove mothers to unthinkable acts, the slaughter and humiliation, and the long lines of captives marched into exile. The personified city sits like a widow, weeping, with 'none to comfort her.'",
+   "This is the emotional aftermath of everything Kings and Jeremiah described. It refuses to look away from the suffering or to offer cheap comfort, yet at its very center stands one of the Bible's most famous affirmations of hope against all evidence: 'his mercies are new every morning; great is your faithfulness.' It models how a community of faith can grieve honestly and still cling to God."]},
+
+{n:"Obadiah", t:"OT", era:"divided", genre:"Prophet (Minor)",
+ ta:"Obadiah", td:"c. 586 BC",
+ aa:"Obadiah", ad:"Shortly after 586 BC",
+ wctx:["The shortest book in the Old Testament — a single chapter of just 21 verses — attributed to the otherwise unknown prophet Obadiah. Both tradition and most scholars connect it to the period right after Jerusalem's fall in 586 BC, since its central grievance is Edom's behavior during that catastrophe.",
+   "It is a tightly focused oracle of judgment against one nation, Edom, with a wider closing vision of the 'Day of the LORD' over all the nations."],
+ ewhen:"Events: c. 586 BC",
+ ectx:["Edom was the nation descended (in the biblical account) from Esau, Jacob's brother — making Edomites and Israelites kin. When Babylon destroyed Jerusalem, the Edomites, instead of helping their relatives, reportedly gloated over the disaster, looted the city, and even cut down fleeing refugees and handed them over.",
+   "Obadiah's prophecy is a blistering condemnation of this betrayal by a brother-nation, declaring that Edom's pride — secure in its mountain strongholds (likely including the later site of Petra) — will be brought low, and that 'as you have done, it shall be done to you.' It speaks to the special bitterness of betrayal by one's own kin in a moment of total vulnerability."]},
+
+{n:"Ezekiel", t:"OT", era:"exile", genre:"Prophet (Major)",
+ ta:"Ezekiel, a priest exiled to Babylon", td:"c. 593–570 BC",
+ aa:"Ezekiel with some later editing", ad:"Core 6th c. BC",
+ wctx:["Widely accepted, by tradition and scholarship, as the work of Ezekiel — a priest who was among the first wave deported to Babylon in 597 BC, a decade before Jerusalem's final destruction. He prophesied to his fellow exiles by the Kebar canal in Babylonia. The book is unusually systematic, with many oracles precisely dated to the day, which lends weight to its authenticity even if some later editing is recognized.",
+   "Ezekiel is famous for his bizarre and dramatic symbolic actions and visions — lying on his side for over a year, eating a scroll, the wheels-within-wheels vision of God's glory — and for a priestly preoccupation with holiness, the temple, and ritual that fits his background."],
+ ewhen:"Events: c. 593–571 BC, in Babylonian exile",
+ ectx:["Ezekiel ministers entirely in exile, among Judeans uprooted from their homeland and resettled in Babylonia, the heart of the empire that had conquered them. In the first half of his book, before Jerusalem falls, he insists against the exiles' false hopes that the city is doomed because of its persistent idolatry and injustice — even depicting God's glory departing from the temple.",
+   "After news of Jerusalem's destruction arrives, his message pivots dramatically toward restoration and hope: the vision of a valley of dry bones coming to life as a resurrected nation, the promise of a new heart and a new spirit, and an elaborate blueprint of a future restored temple from which life-giving water flows. He gives a displaced, despairing people both an honest explanation for their suffering and a reason to believe in a future."]},
+
+{n:"Daniel", t:"OT", era:"exile", genre:"Prophet / Apocalyptic",
+ ta:"Daniel, an exile in the Babylonian/Persian courts", td:"c. 535 BC",
+ aa:"Anonymous author(s)", ad:"c. 165 BC (Maccabean crisis), using older legends",
+ wctx:["This is one of the sharpest dating debates in the entire Bible. The traditional view takes the book at face value: Daniel, a Judean noble deported to Babylon as a youth, rose to serve in the courts of Babylonian and Persian kings and wrote in the 6th century BC, including genuine long-range prophecies of empires to come.",
+   "Most critical scholars date the book's final form to around 165 BC, during the persecution of the Jews by the Greek ruler Antiochus IV Epiphanes. Their main arguments: the book's detailed 'predictions' track the Hellenistic period (especially Antiochus's reign) with remarkable precision but grow vague about events after 164 BC; its Hebrew and Aramaic appear late; it sits among the 'Writings' rather than the 'Prophets' in the Hebrew Bible; and it includes Persian and Greek loanwords. On this view the older court legends (chapters 1–6) were combined with later apocalyptic visions (chapters 7–12) to encourage Jews to stay faithful under a brutal regime by showing that God controls the rise and fall of empires."],
+ ewhen:"Setting: c. 605–536 BC, the Babylonian and Persian courts",
+ ectx:["The narrative is set in the imperial courts of Babylon and then Persia, following Daniel and his three companions as faithful Jews navigating life and high office under pagan superpowers. The famous stories — the refusal to eat the king's food, the fiery furnace, Nebuchadnezzar's madness, the mysterious 'writing on the wall' at Belshazzar's feast, and Daniel in the lions' den — all dramatize how to remain loyal to God while serving (and sometimes defying) foreign rulers.",
+   "The second half shifts to apocalyptic visions in which beasts and figures represent successive world empires — Babylon, Medo-Persia, Greece, and beyond — sweeping toward a final kingdom of God. Whether read as 6th-century prophecy or 2nd-century encouragement under persecution, the book's enduring message is the same: earthly empires are temporary, God is sovereign over history, and the faithful will ultimately be vindicated."]},
+
+/* ===== 6. EXILE / RETURN ===== */
+{n:"Ezra", t:"OT", era:"exile", genre:"History",
+ ta:"Ezra the scribe", td:"c. 450–440 BC",
+ aa:"The 'Chronicler' (anonymous)", ad:"c. 400–350 BC",
+ wctx:["Ezra and Nehemiah were originally a single book, and both tradition and much scholarship connect them (along with Chronicles) to a post-exilic author working from official documents, memoirs, and decrees. Tradition specifically credits Ezra, the priest-scribe and expert in the Law of Moses, as the driving figure and likely author of the material bearing his name.",
+   "The book even preserves sections in Aramaic — the administrative language of the Persian Empire — quoting official correspondence and royal edicts, which gives it the texture of a documented chronicle. Its purpose is to show how God, working through Persian kings, brought his people home and re-established worship and Torah at the center of their common life."],
+ ewhen:"Events: c. 538–458 BC",
+ ectx:["The book opens with the decree of Cyrus the Great of Persia in 538 BC, permitting the exiled Judeans to return to Jerusalem and rebuild the temple — part of Persia's broader, tolerant policy of letting subject peoples restore their local sanctuaries. The first returnees, led by Zerubbabel and the high priest Jeshua, rebuild the altar and, despite opposition and discouragement, eventually complete the Second Temple in 516 BC.",
+   "Decades later, Ezra himself arrives from Babylon (around 458 BC) with royal backing to teach and enforce the Law. He is confronted with the crisis of intermarriage with surrounding peoples and leads a wrenching reform. Throughout, the setting is a small, vulnerable province (Yehud) within the vast Persian Empire, struggling to rebuild its identity around temple and Torah under imperial oversight."]},
+
+{n:"Haggai", t:"OT", era:"exile", genre:"Prophet (Minor)",
+ ta:"Haggai", td:"520 BC",
+ aa:"Haggai", ad:"520 BC (precisely dated)",
+ wctx:["Accepted by virtually everyone as the work of the prophet Haggai, and one of the most precisely dated books in the Bible — its four short messages are pinned to specific days in the second year of the Persian king Darius I, i.e. 520 BC.",
+   "Haggai's prophecies are brief, blunt, and practical, aimed at motivating a discouraged community to finish a long-stalled building project."],
+ ewhen:"Events: 520 BC",
+ ectx:["About eighteen years after the first exiles returned, the rebuilding of the temple had stalled. The returnees, facing economic hardship, opposition from neighbors, and the daily grind of survival, had let the foundations sit while they 'paneled their own houses.' Crops were failing and the economy was struggling.",
+   "Haggai connects these troubles directly to the people's misplaced priorities and calls them to 'consider their ways' and rebuild God's house first, promising that God's presence and blessing will follow. His pointed preaching, alongside Zechariah's, succeeded: work on the temple resumed and it was completed a few years later. The book gives a window into the discouragement and competing priorities of the early restoration community under Persian rule."]},
+
+{n:"Zechariah", t:"OT", era:"exile", genre:"Prophet (Minor)",
+ ta:"Zechariah", td:"c. 520–480 BC",
+ aa:"Zechariah (ch. 1–8) plus later material (ch. 9–14)", ad:"Ch. 1–8 c. 520 BC; ch. 9–14 later",
+ wctx:["Tradition holds that the whole book is the work of the prophet Zechariah, a contemporary of Haggai who began prophesying in 520 BC to spur on the temple rebuilding.",
+   "Many scholars divide the book: chapters 1–8, full of dated night-visions tied to the restoration, are assigned to the 6th-century prophet, while chapters 9–14, which are undated, stylistically different, and more sweepingly apocalyptic, are often dated later. These latter chapters contain imagery — a king coming humble on a donkey, thirty pieces of silver, a pierced figure who is mourned — that the Gospels would later apply to Jesus."],
+ ewhen:"Events: c. 520 BC onward",
+ ectx:["Like Haggai, Zechariah ministers to the returned exiles to encourage the rebuilding of the temple, but he does so through a series of vivid, symbolic night-visions — lampstands, horsemen, a flying scroll, a measuring line — that reassure the small, struggling community of God's renewed presence and future plans for Jerusalem.",
+   "Beyond the immediate building project, Zechariah looks ahead to a coming messianic king and a day when Jerusalem will be the center of God's worldwide reign. The book blends the gritty concerns of a post-exilic province under Persia with soaring visions of ultimate restoration, making it one of the most quoted Old Testament books in the New Testament's account of Jesus."]},
+
+{n:"Esther", t:"OT", era:"exile", genre:"History / Narrative",
+ ta:"Mordecai (by tradition)", td:"c. 460 BC",
+ aa:"Anonymous", ad:"c. 4th–3rd c. BC",
+ wctx:["Tradition links the book to Mordecai, the Jewish official at its center, who is depicted recording the events. Scholars more often see it as a later, anonymous historical novella written to explain and authorize the festival of Purim.",
+   "Esther is famous for a striking feature: it never once mentions God, prayer, or the Law explicitly. Some read this as a literary device pointing to God's hidden providence working behind ordinary events and human courage; either way, it gave diaspora Jews — those living outside the land — a story about surviving and even thriving under foreign rule."],
+ ewhen:"Events: c. 483–473 BC, reign of Xerxes I",
+ ectx:["The story unfolds entirely in the Persian capital of Susa, in the court of King Ahasuerus, generally identified with Xerxes I (reigned 486–465 BC). It centers on the Jewish community that did not return to Judah but remained scattered throughout the vast empire, from India to Cush (Ethiopia).",
+   "When the royal vizier Haman engineers a decree to exterminate all the Jews of the empire, a young Jewish woman named Esther — who has become queen while concealing her identity — risks her life to expose the plot, with the famous challenge that she may have come to her position 'for such a time as this.' The deliverance of the Jews and the downfall of Haman are celebrated annually in the feast of Purim. The book vividly portrays court intrigue, the perils of life as a minority under an absolute monarch, and the precariousness of the diaspora."]},
+
+{n:"Nehemiah", t:"OT", era:"exile", genre:"History",
+ ta:"Nehemiah (memoirs)", td:"c. 445–420 BC",
+ aa:"The 'Chronicler,' using Nehemiah's memoir", ad:"c. 400–350 BC",
+ wctx:["The book draws heavily on what is widely regarded as Nehemiah's own first-person memoir — a vivid, candid, sometimes irritable account written in the voice of a high-ranking Persian court official. Both tradition and scholarship recognize this strong eyewitness core, even if a later editor (the 'Chronicler') incorporated it into the larger Ezra–Nehemiah work.",
+   "Its frank tone, attention to administrative and logistical detail, and the recurring prayer 'remember me, O my God, for good' give it the feel of a genuine personal record from the heart of the Persian imperial system."],
+ ewhen:"Events: c. 445–432 BC",
+ ectx:["Nehemiah served as cupbearer to the Persian king Artaxerxes I — a trusted, intimate position in the imperial court. Hearing that Jerusalem's walls still lay in ruins nearly a century after the first return, he obtained royal permission and resources to go and rebuild them, becoming governor of the province.",
+   "The book recounts the rebuilding of the city walls in a remarkable fifty-two days, despite mockery, threats, and sabotage from regional rivals like Sanballat and Tobiah, with workers building 'with one hand and holding a weapon in the other.' Nehemiah then partners with Ezra to renew the covenant and reform the community's social and religious life. Together, Ezra and Nehemiah form the capstone of the return-from-exile story — a people physically and spiritually re-establishing themselves under empire."]},
+
+{n:"Malachi", t:"OT", era:"exile", genre:"Prophet (Minor)",
+ ta:"Malachi", td:"c. 430 BC",
+ aa:"Anonymous ('Malachi' may mean 'my messenger')", ad:"c. 450–430 BC",
+ wctx:["The name 'Malachi' means 'my messenger,' which leads some scholars to suspect it may be a title rather than a personal name; either way, tradition and scholarship agree on a late post-exilic date, around the time of Ezra and Nehemiah.",
+   "Malachi is structured as a series of disputations — God makes a charge, the people (or priests) cynically dispute it, and God answers. It is the last book of the Old Testament in the Christian arrangement, and its closing promise of a coming 'messenger' and the return of 'Elijah' before the great Day of the LORD became, for Christians, a bridge to the New Testament and the figure of John the Baptist."],
+ ewhen:"Events: c. 430 BC",
+ ectx:["By Malachi's day, the initial excitement of the return and the temple's rebuilding had long faded into routine and disillusionment. The grand prophetic promises of restoration had not produced the glorious future people expected; instead they faced economic hardship, intermarriage, and the temptation to cynicism. The result was spiritual apathy — half-hearted worship, blemished sacrifices, neglected tithes, and priests going through the motions.",
+   "Malachi confronts both the people and the priests for this compromised, going-through-the-motions religion, while reaffirming God's love and calling for renewed faithfulness. His book closes the Old Testament not with a triumphant fulfillment but with a forward-leaning expectation — a promised messenger to come — followed by roughly four centuries of prophetic silence before the events of the Gospels."]},
+
+/* ===== 7. GOSPELS ===== */
+{n:"Matthew", t:"NT", era:"gospels", genre:"Gospel",
+ ta:"Matthew (Levi), the tax-collector apostle", td:"c. AD 50–60",
+ aa:"Anonymous; a Jewish-Christian author using Mark", ad:"c. AD 80–90",
+ wctx:["Tradition assigns this Gospel to Matthew (also called Levi), a tax collector whom Jesus called to be one of the Twelve — an apt author for a book attentive to money and meticulous in organization. Early church writers affirmed Matthew's authorship.",
+   "Most modern scholars regard the Gospels as originally anonymous and assigned their names later. They commonly date Matthew to around AD 80–90, after the destruction of Jerusalem, and see it as the work of a Jewish-Christian author writing for a largely Jewish-Christian community, drawing on the earlier Gospel of Mark plus a hypothesized sayings source ('Q') and material unique to Matthew. The book is shaped to present Jesus as the new Moses and the fulfillment of Israel's scriptures, repeatedly noting how events happened 'to fulfill what was written.'"],
+ ewhen:"Events: c. 6/4 BC – AD 30/33",
+ ectx:["Matthew narrates Jesus' life from a royal genealogy and birth (the visit of the magi, the flight to Egypt) through his teaching, miracles, death, and resurrection. It is organized around five great discourses — most famously the Sermon on the Mount — echoing the five books of Moses and framing Jesus as the authoritative teacher of a renewed people.",
+   "The setting is Roman-occupied Judea and Galilee in the early first century, a land under the client kings of Herod's dynasty and Roman governors, seething with messianic expectation and tension between various Jewish groups (Pharisees, Sadducees, and others). Matthew's heavy engagement with the Jewish law, the Pharisees, and the Hebrew scriptures reflects a community still defining itself in relation to Judaism in the decades after the temple's fall."]},
+
+{n:"Mark", t:"NT", era:"gospels", genre:"Gospel",
+ ta:"John Mark, recording Peter's preaching", td:"c. AD 50–60",
+ aa:"Anonymous; earliest Gospel", ad:"c. AD 65–70",
+ wctx:["Tradition holds that John Mark — a companion of both Paul and Peter, mentioned in Acts and the epistles — wrote down the apostle Peter's eyewitness preaching about Jesus, making this Gospel essentially Peter's memoirs at one remove.",
+   "Scholars widely agree that Mark is the earliest of the four Gospels, written around AD 65–70, and that it served as a primary source for Matthew and Luke (a foundational conclusion of Gospel studies). Its blunt, urgent, fast-paced style — everything happens 'immediately' — and its unpolished Greek fit an early, vivid account. Many connect its composition to Rome during or just after the persecution of Christians under the emperor Nero."],
+ ewhen:"Events: c. AD 27–33 (Jesus' public ministry)",
+ ectx:["Mark is the shortest and most action-driven Gospel, skipping the birth stories to plunge straight into Jesus' public ministry — his baptism, his healings and exorcisms, his clashes with religious authorities, and his relentless movement toward Jerusalem and the cross. Roughly the entire second half builds toward the passion.",
+   "Written for a community likely facing persecution, Mark emphasizes the cost of following Jesus and the theme of the 'suffering Messiah' who must die before he is vindicated. Its portrait of disciples who repeatedly misunderstand Jesus would have spoken directly to struggling believers, and its abrupt original ending — at the empty tomb, with the women afraid — leaves readers to respond for themselves."]},
+
+{n:"Luke", t:"NT", era:"gospels", genre:"Gospel",
+ ta:"Luke, the physician and Paul's companion", td:"c. AD 60–62",
+ aa:"Anonymous author (same as Acts), using Mark", ad:"c. AD 80–90",
+ wctx:["Tradition names Luke, a gentile physician and traveling companion of the apostle Paul, as the author of both this Gospel and its sequel, Acts — together making up more than a quarter of the New Testament. The two volumes are addressed to a patron named Theophilus and open with a stated intention to write an 'orderly account' based on careful investigation of eyewitness testimony.",
+   "Scholars accept the unity of Luke–Acts and that the author used Mark and other sources, but many date the finished work to around AD 80–90. Whoever the author, the writing is the most polished Greek in the Gospels and reflects a well-educated person consciously writing history for a Greco-Roman readership, carefully anchoring events to the wider Roman world."],
+ ewhen:"Events: c. 6/4 BC – AD 33",
+ ectx:["Luke tells Jesus' story with a distinctive emphasis on his compassion for the marginalized — the poor, the sick, women, Samaritans, tax collectors, and sinners. Unique to Luke are some of the best-known parables (the Good Samaritan, the Prodigal Son) and a rich infancy narrative centered on Mary.",
+   "The author repeatedly situates the gospel within world history, dating events by Roman emperors, governors, and high priests ('in the days of Caesar Augustus... while Quirinius was governor of Syria'), underscoring that these events happened on the public stage of the Roman Empire. The portrait is of a Savior for all peoples, not just Israel — a theme that flows directly into Acts and the gentile mission."]},
+
+{n:"John", t:"NT", era:"gospels", genre:"Gospel",
+ ta:"John, the apostle ('the disciple whom Jesus loved')", td:"c. AD 85–90",
+ aa:"The 'Johannine community'; a later author", ad:"c. AD 90–100",
+ wctx:["Tradition assigns this Gospel to the apostle John, son of Zebedee, identified within the book as 'the disciple whom Jesus loved,' writing in his old age (perhaps from Ephesus) as the last surviving apostle.",
+   "Many scholars instead attribute it to a 'Johannine community' or a later author working within John's tradition, dating it to the end of the first century — the latest of the four Gospels. They note its strikingly different style and content from the other three (the 'Synoptics'): long discourses instead of short sayings, a different selection of events, and a far more developed theology of Jesus as the divine, pre-existent Word. Its themes of conflict with 'the Jews' and exclusion from the synagogue are often read as reflecting tensions late in the century as the church and synagogue separated."],
+ ewhen:"Events: c. AD 27–33",
+ ectx:["John recounts Jesus' ministry through a carefully chosen set of seven 'signs' (miracles) and seven 'I am' statements ('I am the bread of life,' 'the light of the world,' 'the resurrection and the life'), each unpacking who Jesus is. It opens not with a birth but with a soaring cosmic prologue — 'In the beginning was the Word' — identifying Jesus with the eternal God.",
+   "Set in the same first-century Judea as the other Gospels, John spends more time in Jerusalem and at the festivals, and offers extended, intimate scenes — the conversation with Nicodemus, the Samaritan woman at the well, the raising of Lazarus, and the long farewell discourses at the Last Supper. Written for a church increasingly distinct from the synagogue, it aims explicitly to evoke belief 'that Jesus is the Christ, the Son of God.'"]},
+
+/* ===== 8. CHURCH / LETTERS ===== */
+{n:"Acts", t:"NT", era:"church", genre:"History",
+ ta:"Luke", td:"c. AD 62–64",
+ aa:"Anonymous author of Luke", ad:"c. AD 80–90",
+ wctx:["Acts is the second volume of Luke's work, by the same author and addressed to the same Theophilus, picking up exactly where the Gospel ends. Tradition's earlier dating (around AD 62–64) rests partly on the fact that Acts ends abruptly with Paul under house arrest in Rome, awaiting trial, without recording his death — suggesting it was written before that outcome was known.",
+   "Scholars who date Luke later place Acts with it, around AD 80–90. The book's so-called 'we' passages, where the narration shifts to first-person plural, are taken by traditional readers as evidence that the author personally accompanied Paul on parts of his journeys. Either way, Acts is the indispensable historical framework for understanding the world into which nearly all the New Testament letters were written."],
+ ewhen:"Events: c. AD 30–62",
+ ectx:["Acts traces the explosive growth of the church from a small band of frightened disciples in Jerusalem to a movement reaching the capital of the empire. It begins with the ascension of Jesus and the dramatic outpouring of the Spirit at Pentecost, follows the early Jerusalem church and the ministry of Peter, and then pivots to Paul, the former persecutor turned apostle, whose missionary journeys carry the gospel across the Roman world.",
+   "The setting is the first-century Roman Empire, with its network of roads, sea routes, cities, synagogues, and Greco-Roman culture providing the highways along which Christianity spread. Acts shows the faith moving outward geographically and culturally — from Jews to Samaritans to gentiles — and grappling with how a Jewish messianic movement becomes a universal faith, culminating in Paul preaching in Rome itself."]},
+
+{n:"James", t:"NT", era:"church", genre:"Letter (General)",
+ ta:"James, the brother of Jesus, leader of the Jerusalem church", td:"c. AD 45–49",
+ aa:"Debated; possibly James or a later writer", ad:"c. AD 50–90",
+ wctx:["Tradition and many scholars identify the author as James, the brother of Jesus, who became the leading figure of the Jerusalem church (not the apostle James, who was martyred early). If so, this is likely one of the earliest New Testament writings, predating most of Paul's letters.",
+   "Some scholars question the attribution, pointing to the polished Greek, and propose a later writer using James's authority. The letter's strongly Jewish-Christian flavor, its echoes of Jesus' own teaching (especially the Sermon on the Mount), and its practical, wisdom-literature style fit a leader steeped in the early Jerusalem community. Its emphasis on 'faith without works is dead' has long been read alongside Paul's emphasis on faith, sometimes as tension, often as complement."],
+ ewhen:"Written: c. late AD 40s, early church period",
+ ectx:["James addresses 'the twelve tribes scattered among the nations' — Jewish Christians dispersed across the Roman world — with blunt, practical, proverb-like instruction on living out the faith. He tackles favoritism toward the rich, the danger of an untamed tongue, the emptiness of belief that produces no action, quarrels driven by greed, and the duty to care for widows and orphans.",
+   "The letter reflects an early church facing real economic inequality and social tension, with wealthy landowners exploiting poor laborers. Its concerns are intensely down-to-earth: how faith shows up in money, speech, patience under trial, and treatment of the vulnerable. It reads less like theology and more like the wisdom of a pastor determined that belief translate into behavior."]},
+
+{n:"Galatians", t:"NT", era:"church", genre:"Letter (Pauline)",
+ ta:"Paul", td:"c. AD 48–49 (or 53–55)",
+ aa:"Paul (undisputed)", ad:"c. AD 48–55",
+ wctx:["Galatians is universally accepted as a genuine letter of Paul, and may be his earliest surviving one (some date it to around AD 48–49, just before or after the Jerusalem Council described in Acts 15; others place it in the mid-50s). It is written in white heat, without Paul's usual opening thanksgiving, because he is alarmed.",
+   "The letter is a primary source for Paul's own account of his conversion and his relationship with the Jerusalem apostles, making it historically precious. It crackles with personal urgency and theological force as Paul defends both his apostolic authority and the heart of his gospel."],
+ ewhen:"Written: c. AD 48–55",
+ ectx:["Paul had founded churches in the region of Galatia (in central Asia Minor, modern Turkey) among gentile converts. After he left, other teachers ('Judaizers') arrived insisting that to be true Christians, these gentiles must also be circumcised and keep the Jewish law. This was the defining crisis of the early church: was Christianity a sect of Judaism requiring full Torah observance, or a faith open to all on equal terms through Christ?",
+   "Paul responds with passionate clarity that people are justified — set right with God — by faith in Christ, not by 'works of the law,' and that to require circumcision is to nullify grace. The letter's argument about freedom from the law and life by the Spirit later became foundational for the Protestant Reformation. It captures the church at a pivotal hinge between its Jewish roots and its universal future."]},
+
+{n:"1 Thessalonians", t:"NT", era:"church", genre:"Letter (Pauline)",
+ ta:"Paul", td:"c. AD 50–51",
+ aa:"Paul (undisputed)", ad:"c. AD 50–51",
+ wctx:["Undisputedly Paul's, and widely considered one of his earliest surviving letters — which would make it among the oldest documents in the entire New Testament, written about two decades after Jesus' crucifixion and well before any of the Gospels.",
+   "Paul wrote it from Corinth shortly after planting the church in Thessalonica and then being forced to leave abruptly. His co-worker Timothy had just returned with an encouraging report, prompting this warm, relieved, affectionate letter."],
+ ewhen:"Written: c. AD 50–51",
+ ectx:["Thessalonica was the prosperous capital of the Roman province of Macedonia, strategically located on the great Egnatian Way, the main east-west road of the empire. Paul had founded a church there but had to flee under persecution after only a short stay, leaving a young congregation vulnerable.",
+   "The letter encourages these new believers to stand firm under social pressure and persecution, commends their growing reputation, and addresses a specific worry: some Christians had died, and the community feared they would miss out when Christ returned. Paul reassures them about 'those who have fallen asleep' and the hope of resurrection, giving some of the New Testament's earliest teaching on Christ's return."]},
+
+{n:"2 Thessalonians", t:"NT", era:"church", genre:"Letter (Pauline)",
+ ta:"Paul", td:"c. AD 51–52",
+ aa:"Paul, or a close associate (debated)", ad:"c. AD 51 or later",
+ wctx:["Traditionally a follow-up letter Paul sent to Thessalonica soon after the first, to clear up confusion that had arisen. Some scholars question whether Paul wrote it, citing differences in tone and its more developed treatment of end-times events, and suggest a close associate writing in his name; many, however, accept it as Paul's.",
+   "The letter addresses both doctrinal confusion and a practical behavioral problem in the same young church."],
+ ewhen:"Written: c. AD 51–52",
+ ectx:["Some in the Thessalonian church had become convinced that 'the day of the Lord' had already come or was so imminent that normal life was pointless — and as a result, some had stopped working altogether and were living off others. Persecution was also still pressing on the community.",
+   "Paul corrects the end-times confusion (explaining that certain events must occur first), encourages the persecuted believers with the promise of God's justice, and lays down a famously firm principle about the idle: 'if anyone is not willing to work, let him not eat.' The letter shows an early church wrestling with how to live faithfully and productively in the present while awaiting Christ's return."]},
+
+{n:"1 Corinthians", t:"NT", era:"church", genre:"Letter (Pauline)",
+ ta:"Paul", td:"c. AD 53–55",
+ aa:"Paul (undisputed)", ad:"c. AD 53–55",
+ wctx:["Undisputedly Paul's, written from Ephesus during his extended ministry there, in response to both troubling reports and a list of written questions from the church he had founded in Corinth. It is one of the most practically detailed letters in the New Testament, addressing real conflicts in a specific congregation.",
+   "Because Paul tackles concrete problems one by one, the letter offers an unusually vivid window into the daily life, struggles, and disputes of a first-century church."],
+ ewhen:"Written: c. AD 53–55",
+ ectx:["Corinth was a wealthy, cosmopolitan Roman commercial hub — a port city straddling a key trade route, packed with people of every background, religion, and vice, and notorious throughout the ancient world for its sexual immorality. The young church there mirrored its chaotic surroundings.",
+   "Paul addresses a barrage of problems: factions rallying around rival leaders, a scandalous case of immorality, believers suing each other in pagan courts, confusion about marriage and singleness, disputes over food sacrificed to idols, disorder at the Lord's Supper, rivalry over spiritual gifts, and doubts about the resurrection. In the middle of all this practical correction sits the soaring 'love chapter' (chapter 13) and a magnificent defense of the bodily resurrection, showing Paul weaving the loftiest theology into the messiest realities of church life."]},
+
+{n:"2 Corinthians", t:"NT", era:"church", genre:"Letter (Pauline)",
+ ta:"Paul", td:"c. AD 55–56",
+ aa:"Paul (undisputed)", ad:"c. AD 55–56",
+ wctx:["Undisputedly Paul's, and the most personal, emotional, and at times anguished of all his letters. It was written after a painful chapter in his relationship with the Corinthians — a confrontation, a sorrowful visit, and a 'severe letter' (now lost) — and reflects his relief at their partial reconciliation as well as his frustration with continuing opposition.",
+   "Because it is so autobiographical, it reveals more about Paul's own sufferings, motives, and inner life than any other letter."],
+ ewhen:"Written: c. AD 55–56",
+ ectx:["In the interval since the first letter, rival teachers — Paul sarcastically calls them 'super-apostles' — had infiltrated the Corinthian church, undermining his authority, questioning his credentials, and mocking his unimpressive presence and refusal to take payment. Paul writes to defend his apostleship and to repair the relationship.",
+   "He does so not by boasting of strength but, paradoxically, by boasting of his weaknesses and sufferings — the beatings, shipwrecks, imprisonments, and his mysterious 'thorn in the flesh' — because 'when I am weak, then I am strong.' He also organizes a major relief collection for the impoverished believers in Jerusalem, giving the New Testament's fullest teaching on generosity. The letter lays bare the cost and conflict of early Christian leadership."]},
+
+{n:"Romans", t:"NT", era:"church", genre:"Letter (Pauline)",
+ ta:"Paul", td:"c. AD 57",
+ aa:"Paul (undisputed)", ad:"c. AD 57",
+ wctx:["Undisputedly Paul's, and widely regarded as his theological masterpiece — the fullest, most systematic statement of his gospel. He dictated it to a scribe named Tertius (who adds his own greeting) from Corinth around AD 57, near the end of his third missionary journey.",
+   "Uniquely, Paul wrote it to a church he had neither founded nor yet visited, so rather than addressing local crises he sets out his message in a comprehensive, carefully argued form — which is partly why it became the seedbed of so much later Christian theology, shaping figures from Augustine to Luther to Wesley."],
+ ewhen:"Written: c. AD 57",
+ ectx:["Paul wrote to the Christians in Rome, the capital of the empire, to introduce himself and his message ahead of a planned visit, hoping the Roman church would become a base for a future mission to Spain. The Roman congregation included both Jewish and gentile believers, and tensions between them — heightened by the earlier expulsion and return of Jews from Rome under imperial decree — form part of the backdrop.",
+   "The letter lays out a sweeping argument: all humanity, Jew and gentile alike, is under sin; all are justified freely by grace through faith in Christ; and this gospel transforms how people live by the Spirit. Paul then wrestles with the place of Israel in God's plan and closes with intensely practical instruction on love, humility, conscience, and submission to authorities — addressing how a mixed community should live together in the heart of the empire."]},
+
+{n:"Colossians", t:"NT", era:"church", genre:"Letter (Pauline / Prison)",
+ ta:"Paul (from prison)", td:"c. AD 60–62",
+ aa:"Paul or a disciple (debated)", ad:"c. AD 60–80",
+ wctx:["One of the four 'Prison Epistles' (with Ephesians, Philippians, and Philemon), traditionally written by Paul during his imprisonment in Rome. Some scholars question Paul's direct authorship on stylistic grounds and suggest a close disciple, but the letter is tightly linked to Philemon — which is undisputedly Paul's and shares the same personal names — which strengthens the case for authenticity.",
+   "It was carried, along with Philemon, by Tychicus and the returning slave Onesimus to the church at Colossae."],
+ ewhen:"Written: c. AD 60–62",
+ ectx:["Colossae was a small city in the Lycus Valley of Asia Minor (modern Turkey). The church there, which Paul had not personally founded, was being unsettled by a strange syncretistic teaching — a blend that apparently mixed Jewish practices, ascetic rule-keeping, the worship of angelic 'powers,' and esoteric 'philosophy.'",
+   "Paul counters by exalting the absolute supremacy and complete sufficiency of Christ, in whom 'all the fullness of God dwells' and through whom all things were created and reconciled. Against any system promising secret knowledge or higher spiritual access through rules and rituals, he insists that believers are already complete in Christ. The letter then turns practical, with instruction for transformed living and for the relationships of the Christian household."]},
+
+{n:"Philemon", t:"NT", era:"church", genre:"Letter (Pauline / Prison)",
+ ta:"Paul (from prison)", td:"c. AD 60–62",
+ aa:"Paul (undisputed)", ad:"c. AD 60–62",
+ wctx:["Undisputedly Paul's, and the shortest and most personal of his letters — a single chapter written from prison to an individual, Philemon, a wealthy Christian and slave-owner whose house hosted a church. It is essentially a private letter of appeal, yet it was preserved and circulated for its profound implications.",
+   "It is closely tied to Colossians (same companions, same setting), reinforcing the dating and the picture of Paul's imprisonment."],
+ ewhen:"Written: c. AD 60–62",
+ ectx:["Onesimus, a slave belonging to Philemon, had apparently run away (perhaps after wronging his master) and somehow encountered the imprisoned Paul, through whom he became a Christian. Paul now sends him back to Philemon — a legally risky move, since runaway slaves could be severely punished — carrying this letter.",
+   "Paul appeals to Philemon to receive Onesimus back not merely as a slave but 'as a beloved brother,' even offering to pay any debt Onesimus owed. Without directly attacking the institution of slavery, which was woven into the fabric of Roman society, Paul plants a quietly revolutionary principle: in Christ, master and slave are now family. The letter has been central to later Christian reflection on slavery, dignity, and reconciliation."]},
+
+{n:"Ephesians", t:"NT", era:"church", genre:"Letter (Pauline / Prison)",
+ ta:"Paul (from prison)", td:"c. AD 60–62",
+ aa:"Paul or a later disciple (debated)", ad:"c. AD 60–90",
+ wctx:["Traditionally a Prison Epistle of Paul, written during his Roman imprisonment. Notably, the words 'in Ephesus' are missing from some of the earliest manuscripts, leading many to think it was a circular letter intended for several churches in Asia Minor, with Ephesus as the chief one.",
+   "Some scholars question direct Pauline authorship because of its distinctive vocabulary, long flowing sentences, and general (rather than situation-specific) character, suggesting a later disciple writing in Paul's name; others maintain it is Paul's, written in a more reflective, liturgical mode."],
+ ewhen:"Written: c. AD 60–62",
+ ectx:["Ephesus was a major, wealthy city of the Roman province of Asia, famous for the temple of Artemis (one of the seven wonders of the ancient world) and steeped in magic, idolatry, and pagan religion. The church there was largely gentile.",
+   "Unlike most of Paul's letters, Ephesians addresses no specific crisis; instead it offers a sweeping meditation on God's grand plan to 'unite all things in Christ' and on the church as a new humanity in which the ancient division between Jew and gentile is abolished — 'one new man' and one body. The second half applies this to daily life: unity, holiness, marriage and family, work, and the famous call to 'put on the whole armor of God' to stand against spiritual evil. It reads as a majestic summary of Paul's vision of the church."]},
+
+{n:"Philippians", t:"NT", era:"church", genre:"Letter (Pauline / Prison)",
+ ta:"Paul (from prison)", td:"c. AD 60–62",
+ aa:"Paul (undisputed)", ad:"c. AD 60–62",
+ wctx:["Undisputedly Paul's, and the warmest and most joyful of his letters — remarkable given that he wrote it from prison, facing the possibility of execution. It is a letter of friendship and gratitude to a church he loved deeply and that had repeatedly supported him financially.",
+   "The Philippian church, in the Roman colony of Philippi in Macedonia, was Paul's first congregation founded on European soil (its beginnings, including Lydia and the Philippian jailer, are recounted in Acts 16)."],
+ ewhen:"Written: c. AD 60–62",
+ ectx:["Philippi was a proud Roman colony populated by retired soldiers, with Roman citizenship and customs — a status Paul plays on when he reminds the believers that 'our citizenship is in heaven.' The church had sent a gift to Paul in prison through Epaphroditus, and this letter is partly a thank-you note.",
+   "Despite his chains, Paul radiates joy and contentment, urging the Philippians toward unity, humility, and steadfastness amid opposition. The letter's high point is an early Christian hymn celebrating how Christ 'emptied himself,' taking the form of a servant and humbling himself to death on a cross before being exalted — one of the most profound passages in the New Testament about who Jesus is. 'Rejoice in the Lord always' is its keynote."]},
+
+{n:"1 Timothy", t:"NT", era:"church", genre:"Letter (Pastoral)",
+ ta:"Paul", td:"c. AD 62–64",
+ aa:"Debated; many see a later 'Pauline' author", ad:"c. AD 90–110 (by many scholars)",
+ wctx:["One of the three 'Pastoral Epistles' (with 2 Timothy and Titus), traditionally written by Paul to his younger protégé and delegate Timothy, after a release from his first Roman imprisonment, to guide him in leading the church at Ephesus.",
+   "The Pastorals are the most disputed of the letters bearing Paul's name. Many scholars date them after Paul's lifetime (around AD 90–110), pointing to their distinctive vocabulary and style, their concern with more developed church offices and structures (overseers, elders, deacons), and a church-setting that seems more institutional than in Paul's undisputed letters. Defenders attribute the differences to Paul's changed circumstances, subject matter, and possibly a secretary."],
+ ewhen:"Written: c. AD 62–64 (traditional)",
+ ectx:["The letter equips Timothy to lead and order a growing church in Ephesus that is being threatened by false teachers promoting myths, speculative genealogies, and a distorted use of the law. Paul gives instruction on confronting these errors and on the qualifications and conduct of church leaders.",
+   "It reflects a stage at which the first generation of apostles is passing and the church must develop sustainable structures, sound teaching, and orderly worship for the long haul. Topics include prayer, the roles of men and women in the assembly, the character required of overseers and deacons, care for widows, and warnings against the love of money — practical guidance for a maturing institution."]},
+
+{n:"Titus", t:"NT", era:"church", genre:"Letter (Pastoral)",
+ ta:"Paul", td:"c. AD 62–64",
+ aa:"Debated (see 1 Timothy)", ad:"c. AD 90–110 (by many scholars)",
+ wctx:["A Pastoral Epistle, traditionally Paul's letter to Titus, another of his trusted gentile coworkers, whom he had left on the island of Crete to organize the fledgling churches there. Like 1 Timothy and 2 Timothy, its authorship and date are debated along the same lines.",
+   "It is brief and practical, focused on church organization and Christian character."],
+ ewhen:"Written: c. AD 62–64 (traditional)",
+ ectx:["Crete, a large Mediterranean island, had a reputation in the ancient world for unreliability and indulgence — Paul even quotes a Cretan poet's barbed line that 'Cretans are always liars, evil beasts, lazy gluttons.' The young churches there needed structure and sound leadership.",
+   "Paul instructs Titus to appoint qualified elders in every town, to silence false teachers, and to teach 'sound doctrine' that produces good works across all groups in the church — older and younger men and women, and slaves. The recurring theme is that genuine faith and God's grace should visibly transform behavior in a morally lax culture, making the gospel attractive 'so that in everything they may adorn the doctrine of God.'"]},
+
+{n:"2 Timothy", t:"NT", era:"church", genre:"Letter (Pastoral)",
+ ta:"Paul (his final letter)", td:"c. AD 64–67",
+ aa:"Debated (see 1 Timothy)", ad:"c. AD 90–110 (by many scholars)",
+ wctx:["A Pastoral Epistle, traditionally Paul's very last letter — his final words, written from a cold Roman dungeon as he awaited execution under the emperor Nero, around AD 64–67. It is the most personal and moving of the three Pastorals, reading like a farewell.",
+   "Like the others, its authorship is debated by scholars, but even critics recognize its especially intimate, autobiographical tone, with concrete personal details (asking Timothy to bring his cloak and his scrolls, naming friends who stood by him and those who deserted him)."],
+ ewhen:"Written: c. AD 64–67 (traditional)",
+ ectx:["Paul writes from imprisonment, sensing his death is near, to his beloved 'son in the faith' Timothy. The backdrop is the rising danger for Christians in Rome under Nero, whose persecution would claim Paul's life by execution. Many former companions have abandoned Paul, and he longs for Timothy to come to him quickly.",
+   "Against this somber setting, the letter is a stirring charge to Timothy to 'guard the good deposit,' to endure suffering, to avoid pointless controversies, and above all to 'preach the word' faithfully in season and out, even as people drift toward false teaching. Paul's own valedictory — 'I have fought the good fight, I have finished the race, I have kept the faith' — gives the letter the weight of a dying mentor passing the torch."]},
+
+{n:"1 Peter", t:"NT", era:"church", genre:"Letter (General)",
+ ta:"Peter the apostle", td:"c. AD 62–64",
+ aa:"Peter, or a disciple writing in his name", ad:"c. AD 70–90",
+ wctx:["Traditionally written by the apostle Peter from 'Babylon' — widely understood as a coded name for Rome — near the end of his life, perhaps with the help of Silvanus (Silas) as secretary, which may explain its polished Greek.",
+   "Some scholars question whether the Galilean fisherman Peter could have written such refined Greek and suggest a disciple writing in his name after his death; others find the secretary explanation sufficient. Either way, the letter speaks powerfully to Christians on the threshold of serious persecution."],
+ ewhen:"Written: c. AD 62–64 (traditional)",
+ ectx:["The letter is addressed to scattered believers — 'exiles of the dispersion' — across several Roman provinces in Asia Minor (modern Turkey), many of them gentile converts now facing hostility, slander, and social pressure for abandoning their old pagan ways. Persecution was intensifying as the faith spread.",
+   "Peter's central message is how to suffer well: to live such honorable lives that accusations are disproven, to follow the example of Christ who suffered unjustly and entrusted himself to God, and to hold onto a 'living hope' anchored in the resurrection and a future inheritance. He reframes the believers' marginal, alien status in society as a noble calling — they are a 'chosen people,' strangers and pilgrims whose true home is elsewhere."]},
+
+{n:"2 Peter", t:"NT", era:"church", genre:"Letter (General)",
+ ta:"Peter the apostle", td:"c. AD 65–68",
+ aa:"Widely regarded as later/pseudonymous", ad:"c. AD 100–120",
+ wctx:["Traditionally Peter's second letter, presented as his farewell testament written shortly before his death, knowing 'the putting off of my body will be soon.'",
+   "This is among the most disputed books in the New Testament regarding authorship. Many scholars consider it pseudonymous and possibly the latest-written book in the canon (perhaps AD 100–120), citing its very different style from 1 Peter, its apparent reference to Paul's letters as established 'Scripture,' its overlap with the letter of Jude, and its concern with the delay of Christ's return — an issue more pressing as the first generation died. Traditional defenders maintain it is Peter's genuine final word."],
+ ewhen:"Written: c. AD 65–68 (traditional)",
+ ectx:["The letter confronts false teachers who had infiltrated the churches — figures who denied accountability, indulged in immorality, exploited believers for profit, and, crucially, scoffed at the promise of Christ's return: 'Where is the promise of his coming? Everything continues as it has from the beginning.'",
+   "As decades passed and Jesus had not yet returned, such skepticism was a live threat. Peter answers that God's sense of time is not ours ('with the Lord one day is as a thousand years'), that the delay reflects patience meant to allow repentance, and that the 'day of the Lord' will indeed come. He urges believers to grow in virtue and knowledge while they wait, anchoring hope in 'a new heaven and a new earth.'"]},
+
+{n:"Hebrews", t:"NT", era:"church", genre:"Letter / Sermon",
+ ta:"Paul (traditionally), or Barnabas, Apollos, others", td:"c. AD 64–68",
+ aa:"Anonymous — author unknown", ad:"c. AD 60–90",
+ wctx:["The authorship of Hebrews has been uncertain since the earliest centuries of the church. It was sometimes attributed to Paul (and so placed among his letters), but its polished Greek, distinctive style, and anonymous form led even ancient scholars to doubt this; one famously remarked that 'only God knows' who wrote it. Other proposed authors include Barnabas, Apollos, Luke, or Priscilla.",
+   "What most agree on is that it was likely written before AD 70, since it discusses the temple sacrificial system as if it is still operating, without mentioning the temple's destruction — a fact that would have powerfully reinforced its argument had it already happened. It is less a letter than a written sermon or 'word of exhortation.'"],
+ ewhen:"Written: c. AD 64–68",
+ ectx:["The audience appears to be Jewish Christians who, under the pressure of persecution and social cost, were tempted to drift back from Christ into the familiar safety of Judaism and its temple worship. The whole sermon is designed to show why there is no going back.",
+   "Through a sustained argument steeped in the Hebrew scriptures, the author presents Christ as superior to everything the old covenant offered — greater than the angels, than Moses, than the priesthood, than the sacrificial system — and as the once-for-all high priest whose single sacrifice accomplishes what endless animal sacrifices never could. Interwoven are stern warnings against falling away and the magnificent 'hall of faith' (chapter 11), holding up the heroes of Israel's past to urge the readers to 'run with endurance the race set before us.'"]},
+
+{n:"Jude", t:"NT", era:"church", genre:"Letter (General)",
+ ta:"Jude, brother of James and of Jesus", td:"c. AD 65–80",
+ aa:"Jude, or a later writer", ad:"c. AD 70–100",
+ wctx:["The author identifies himself as 'Jude, a servant of Jesus Christ and brother of James' — traditionally understood as another brother of Jesus (and of James the Jerusalem leader). A short, blistering letter, it is closely related to a section of 2 Peter, and scholars debate which drew on which (most think 2 Peter used Jude).",
+   "Some question the attribution and date it somewhat later, but the letter's intense Jewish-Christian character and its use of Jewish traditions fit an early author. It is notable for quoting non-canonical Jewish writings (1 Enoch and an account about Moses)."],
+ ewhen:"Written: c. AD 65–80",
+ ectx:["Jude had intended to write a warm letter about salvation but felt compelled instead to dash off an urgent warning: false teachers had 'crept in unnoticed,' perverting God's grace into a license for immorality and rejecting authority. The letter is a passionate call to 'contend for the faith once for all delivered to the saints.'",
+   "To drive home the certainty of judgment on such people, Jude piles up vivid examples from Israel's history and Jewish tradition — the unbelieving Israelites destroyed in the wilderness, the fallen angels, Sodom and Gomorrah, Cain, Balaam, and Korah. It reflects a young church already having to defend itself from corruption within its own ranks, and it ends with one of the Bible's most beautiful doxologies, to the God 'who is able to keep you from stumbling.'"]},
+
+{n:"1 John", t:"NT", era:"church", genre:"Letter (General)",
+ ta:"John the apostle", td:"c. AD 85–95",
+ aa:"The 'Johannine community' / elder", ad:"c. AD 90–100",
+ wctx:["Traditionally written by the apostle John in his old age, and clearly connected by style, vocabulary, and themes to the Gospel of John (light and darkness, truth and love, life and abiding). Scholars who attribute the Gospel to a 'Johannine community' assign this letter to the same circle, likely toward the end of the first century.",
+   "Unlike most New Testament letters, it has no formal opening or named recipients, reading more like a sermon or pastoral essay sent to a network of churches the author knew well."],
+ ewhen:"Written: c. AD 85–95",
+ ectx:["The community was being torn by people who had left the church and were spreading a dangerous teaching — an early form of what would develop into Gnosticism — that denied Jesus had truly come 'in the flesh,' or that downplayed sin and the importance of moral living. These secessionists claimed superior spiritual knowledge.",
+   "John writes to reassure the believers who remained and to give them tests of genuine faith: right belief about Jesus (truly God come in the flesh), obedience to God's commands, and above all love for one another, since 'God is love.' The letter aims to ground anxious believers in confidence — 'that you may know that you have eternal life' — amid a community fracture over the most basic question of who Jesus really is."]},
+
+{n:"2 John", t:"NT", era:"church", genre:"Letter (General)",
+ ta:"John the apostle ('the elder')", td:"c. AD 85–95",
+ aa:"The Johannine 'elder'", ad:"c. AD 90–100",
+ wctx:["A very short, genuine letter from someone calling himself 'the elder,' tied by style and content to the same Johannine tradition as the Gospel and 1 John, and traditionally identified as the apostle John. It is one of the briefest books in the Bible, the length of a single sheet of ancient papyrus.",
+   "It is addressed to 'the elect lady and her children' — most likely a coded or affectionate way of referring to a particular local church and its members."],
+ ewhen:"Written: c. AD 85–95",
+ ectx:["The same crisis behind 1 John lies in the background: traveling teachers were spreading a false doctrine that denied Jesus had come in the flesh. In the ancient world, itinerant teachers depended on the hospitality of local believers, who would house and support them.",
+   "The elder urges the church to keep walking 'in truth and love,' but also issues a sharp practical warning: do not welcome or support these deceivers, because to offer them hospitality is to share in their corrosive work. The letter shows the early church grappling with discernment — how to remain loving and hospitable while refusing to underwrite teaching that undermined the faith."]},
+
+{n:"3 John", t:"NT", era:"church", genre:"Letter (General)",
+ ta:"John the apostle ('the elder')", td:"c. AD 85–95",
+ aa:"The Johannine 'elder'", ad:"c. AD 90–100",
+ wctx:["The shortest book in the New Testament — a brief personal letter from 'the elder' (traditionally the apostle John) to an individual named Gaius. It belongs to the same Johannine circle and period as 2 John and shares its concerns with truth, love, and the support of traveling missionaries.",
+   "Unlike the other letters, this one deals not with false doctrine but with a personal church-politics conflict, giving a rare candid glimpse of leadership friction in the early church."],
+ ewhen:"Written: c. AD 85–95",
+ ectx:["The letter commends Gaius for his faithful hospitality to traveling missionaries — fellow workers who went out 'for the sake of the name,' depending on local believers for support. It contrasts him with a man named Diotrephes, a domineering church leader who 'loves to be first,' refuses to welcome these missionaries, talks maliciously against the elder, and even expels those who would receive them.",
+   "It also briefly praises a third figure, Demetrius. The little letter opens a window onto the practical realities of the early church: the network of itinerant teachers who spread the faith, the dependence on hospitality, and the all-too-human power struggles that could arise among local leaders. The elder promises to address Diotrephes' behavior in person."]},
+
+{n:"Revelation", t:"NT", era:"church", genre:"Apocalyptic / Prophecy",
+ ta:"John the apostle, exiled on Patmos", td:"c. AD 95",
+ aa:"John of Patmos (a different John, by many scholars)", ad:"c. AD 90–95",
+ wctx:["The book names its author simply as 'John' and says he received the visions while exiled on the island of Patmos. Tradition identifies him as the apostle John, the same author as the Gospel and letters. Many scholars, noting the very different Greek style and theology, distinguish him as 'John of Patmos,' a Christian prophet otherwise unknown.",
+   "Most date it to around AD 95, during the reign of the emperor Domitian, a period associated with pressure on Christians to participate in the imperial cult (worship of the emperor). It belongs to the genre of 'apocalyptic' literature — full of symbolic visions, numbers, and cosmic imagery — a coded mode of writing well understood by its first readers but often puzzling to later ones."],
+ ewhen:"Written: c. AD 95",
+ ectx:["John writes to seven real churches in the Roman province of Asia (modern western Turkey), addressing each with specific commendation and correction before launching into his sweeping visions. These churches faced a mix of pressures: outright persecution, social and economic exclusion for refusing emperor-worship, the seduction of compromise with surrounding pagan culture, and internal complacency.",
+   "Through vivid, often terrifying symbolism — the Lamb, the dragon, the beast (widely understood as imperial Rome), the harlot 'Babylon,' the seals, trumpets, and bowls — Revelation reframes the believers' suffering within a cosmic conflict whose outcome is already decided. Its message to a pressured minority is one of ultimate hope: Christ has conquered, the empires that seem all-powerful will fall, and God will make 'a new heaven and a new earth' where 'he will wipe away every tear.' It closes the entire biblical story with the promise of a restored creation and the return of the King."]}
+];
+
+/* ---------- RENDER ---------- */
+const app = document.getElementById('app');
+const ICON_CHEV = '<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>';
+
+function eraOf(id){return ERAS.find(e=>e.id===id);}
+function paras(field){
+  const arr = Array.isArray(field) ? field : [field];
+  return arr.map(p=>`<p>${p}</p>`).join('');
+}
+function plain(field){
+  const arr = Array.isArray(field) ? field : [field];
+  return arr.join(' ');
+}
+
+function buildView(cls,label,author,date){
+  return `<div class="view ${cls}"><div class="vh">${label}</div>
+    <div class="row"><b>Author</b>${author}</div>
+    <div class="row"><b>Date written</b>${date}</div></div>`;
+}
+
+function cardHTML(b,idx){
+  const blob = (b.n+' '+b.ta+' '+b.aa+' '+plain(b.wctx)+' '+plain(b.ectx)+' '+b.genre).toLowerCase().replace(/"/g,'');
+  return `<article class="card ${b.t==='OT'?'ot':'nt'}" data-name="${b.n.toLowerCase()}" data-blob="${blob}" data-test="${b.t}">
+    <div class="head" onclick="toggleCard(this)">
+      <div class="num">${idx}</div>
+      <div class="titleblock">
+        <h3>${b.n}</h3>
+        <div class="sub"><span>${b.genre}</span><span>•</span><span>${eraOf(b.era).name}</span></div>
+      </div>
+      <span class="tag">${b.t==='OT'?'Old Testament':'New Testament'}</span>
+      ${ICON_CHEV}
+    </div>
+    <div class="body">
+      <div class="views">
+        ${buildView('trad','Traditional view',b.ta,b.td)}
+        ${buildView('acad','Academic view',b.aa,b.ad)}
+      </div>
+      <div class="ctx">
+        <h4>📜 The world of the writing</h4>
+        ${paras(b.wctx)}
+        <h4>🏺 The world of the events</h4>
+        <div class="when">${b.ewhen}</div>
+        ${paras(b.ectx)}
+      </div>
+    </div>
+  </article>`;
+}
+
+function render(){
+  let html='';
+  let idx=0;
+  ERAS.forEach(era=>{
+    const inEra = BOOKS.filter(b=>b.era===era.id);
+    html += `<section class="era-section" data-era="${era.id}">
+      <div class="era">
+        <h2>${era.name} <span class="erdate">${era.date}</span></h2>
+        <p class="edesc">${era.desc}</p>
+        <div class="era-rule"></div>
+      </div>
+      <div class="grid">`;
+    inEra.forEach(b=>{ idx++; html += cardHTML(b,idx); });
+    html += `</div></section>`;
+  });
+  app.innerHTML = html;
+  updateCount();
+}
+
+function toggleCard(el){ el.closest('.card').classList.toggle('open'); }
+
+/* search + filter */
+const q = document.getElementById('q');
+const nores = document.getElementById('nores');
+let testFilter='all';
+
+function applyFilters(){
+  const term = q.value.trim().toLowerCase();
+  let visible=0;
+  document.querySelectorAll('.card').forEach(c=>{
+    const matchTest = testFilter==='all' || c.dataset.test===testFilter;
+    const matchTerm = !term || c.dataset.blob.includes(term);
+    const show = matchTest && matchTerm;
+    c.style.display = show?'':'none';
+    if(show) visible++;
+  });
+  document.querySelectorAll('.era-section').forEach(sec=>{
+    const anyVisible = [...sec.querySelectorAll('.card')].some(c=>c.style.display!=='none');
+    sec.style.display = anyVisible?'':'none';
+  });
+  nores.style.display = visible===0?'block':'none';
+  updateCount(visible);
+}
+function updateCount(v){
+  const total=BOOKS.length;
+  const shown = (v===undefined)?total:v;
+  document.getElementById('count').textContent = `${shown} of ${total} books`;
+}
+
+q.addEventListener('input',applyFilters);
+document.querySelectorAll('#testFilter button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#testFilter button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    testFilter=btn.dataset.f;
+    applyFilters();
+  });
+});
+
+let allOpen=false;
+document.getElementById('toggleAll').addEventListener('click',(e)=>{
+  allOpen=!allOpen;
+  document.querySelectorAll('.card').forEach(c=>c.classList.toggle('open',allOpen));
+  e.target.textContent = allOpen?'Collapse all':'Expand all';
+});
+
+render();
+</script>
+</body>
+</html>
