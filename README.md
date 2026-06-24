@@ -6,7 +6,9 @@ A single-page, offline-friendly companion for reading the Bible in a year. It wa
 - **The world of the writing** — the author or community, the political moment of composition, the purpose, and how the book was transmitted.
 - **The world of the events** — the geopolitical stage (Egypt, Assyria, Babylon, Persia, Rome), key rulers, daily life, customs, and the timeframe of what's being described.
 
-It's built as **one self-contained HTML file** — no build step, no dependencies, no tracking. Open it in any browser, or host it for free on GitHub Pages.
+There's also a second page, **`map.html`** — an interactive, hand-built map of the biblical world (Ur to Rome) with location pins colored by era, the Exodus route, and Paul's journeys + voyage to Rome. Click any place to see what happened there and which books tell its story.
+
+It's built as **self-contained HTML files** — no build step, no dependencies, no tracking. Open them in any browser, or host for free on GitHub Pages or Vercel. The two pages link to each other.
 
 ## Features
 

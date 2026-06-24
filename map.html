@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bible in a Year — Map of the Biblical World</title>
+<style>
+  :root{
+    --bg:#11100e; --panel:#1c1a16; --panel-2:#24211c;
+    --ink:#f3ece0; --muted:#b3a890; --faint:#8a7f6c; --line:#36312a;
+    --gold:#c9a24b; --gold-soft:#e0c47e;
+    --sea:#16242b; --sea2:#1b2d36; --land:#2b2620; --land2:#332d24; --landstroke:#4a4031;
+    --patriarchs:#d4a24c; --exodusconq:#cf7d4a; --kingdom:#6f9bd1;
+    --exile:#b06fcf; --gospels:#5fb09a; --church:#d76b6b;
+    --maxw:1240px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:radial-gradient(1200px 600px at 50% -10%, #1e1b16 0%, var(--bg) 60%);
+    color:var(--ink);font-family:"Iowan Old Style","Palatino Linotype",Georgia,"Times New Roman",serif;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  a{color:var(--gold-soft)}
+
+  /* Top nav */
+  .topnav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0;border-bottom:1px solid var(--line);font-family:ui-sans-serif,system-ui,sans-serif}
+  .topnav .brand{font-family:"Iowan Old Style",Georgia,serif;font-size:18px;font-weight:600;letter-spacing:.3px}
+  .topnav .brand span{color:var(--gold)}
+  .navbtn{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;text-decoration:none;color:var(--muted);background:var(--panel);border:1px solid var(--line);padding:8px 14px;border-radius:999px;transition:.15s}
+  .navbtn:hover{border-color:var(--gold);color:var(--gold-soft)}
+
+  header.hero{text-align:center;padding:40px 20px 14px}
+  .eyebrow{letter-spacing:.32em;text-transform:uppercase;font-size:12px;color:var(--gold);font-family:ui-sans-serif,system-ui,sans-serif;font-weight:600}
+  header.hero h1{font-size:clamp(26px,4.5vw,44px);margin:.25em 0 .15em;font-weight:600;letter-spacing:.5px}
+  header.hero p{max-width:680px;margin:.4em auto 0;color:var(--muted);font-size:16px}
+
+  /* Layout */
+  .layout{display:grid;grid-template-columns:1fr 340px;gap:22px;margin:24px 0 40px;align-items:start}
+  @media(max-width:920px){.layout{grid-template-columns:1fr}}
+
+  .mapcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:10px;position:relative}
+  .mapwrap{position:relative;width:100%}
+  svg.map{width:100%;height:auto;display:block;border-radius:10px;background:
+    radial-gradient(900px 520px at 42% 46%, var(--sea2), var(--sea));}
+  .land{fill:url(#landgrad);stroke:var(--landstroke);stroke-width:1.2;stroke-linejoin:round}
+  .water-label{fill:#5e7c86;font-family:ui-sans-serif,system-ui,sans-serif;font-size:11px;letter-spacing:.28em;text-transform:uppercase;font-weight:600;opacity:.8}
+  .water-label.sm{font-size:9px;letter-spacing:.18em}
+  .river{fill:none;stroke:#3c5a63;stroke-width:1.6;opacity:.85;stroke-linecap:round}
+  .inlandsea{fill:#22383f;stroke:#3c5a63;stroke-width:1}
+
+  .route{fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:2 7;opacity:.95;pointer-events:none;transition:opacity .2s}
+  .route.hidden{display:none}
+  .routedot{pointer-events:none}
+
+  .pin{cursor:pointer}
+  .pin .halo{opacity:0;transition:opacity .15s}
+  .pin:hover .halo,.pin.sel .halo{opacity:.35}
+  .pin .dot{stroke:#0d0c0a;stroke-width:1.2;transition:r .12s}
+  .pin:hover .dot{r:7}
+  .pin.sel .dot{stroke:#fff;stroke-width:2}
+  .pin.dim{opacity:.12;pointer-events:none}
+  .plabel{font-family:ui-sans-serif,system-ui,sans-serif;font-size:10px;fill:#e9e1d3;paint-order:stroke;stroke:#11100e;stroke-width:2.6px;stroke-linejoin:round;pointer-events:none}
+  .plabel.hide{display:none}
+
+  .tooltip{position:absolute;z-index:20;pointer-events:none;background:#000c;border:1px solid var(--line);color:var(--ink);
+    font-family:ui-sans-serif,system-ui,sans-serif;font-size:12.5px;padding:5px 10px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-130%);opacity:0;transition:opacity .12s}
+  .tooltip.show{opacity:1}
+
+  /* Side panel */
+  .side{display:flex;flex-direction:column;gap:16px}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .box h2{font-family:ui-sans-serif,system-ui,sans-serif;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 12px;font-weight:700}
+
+  .legrow{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--ink);font:inherit;cursor:pointer;padding:6px 6px;border-radius:8px;font-family:ui-sans-serif,system-ui,sans-serif;font-size:13.5px;transition:.12s}
+  .legrow:hover{background:var(--panel-2)}
+  .legrow .sw{width:14px;height:14px;border-radius:50%;flex:none;border:1px solid #0008}
+  .legrow .rsw{width:22px;height:0;border-top-width:3px;border-top-style:dashed;flex:none}
+  .legrow.off{opacity:.4}
+  .legrow .lname{flex:1;text-align:left}
+  .legrow .cnt{color:var(--faint);font-size:12px}
+
+  .divider{height:1px;background:var(--line);margin:6px 0}
+  .smallbtns{display:flex;gap:8px;margin-top:10px}
+  .sbtn{flex:1;font-family:ui-sans-serif,system-ui,sans-serif;font-size:12px;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);padding:7px;border-radius:8px;cursor:pointer}
+  .sbtn:hover{color:var(--gold-soft);border-color:var(--gold)}
+  .sbtn.active{background:var(--gold);color:#211c10;font-weight:600;border-color:var(--gold)}
+
+  /* Detail */
+  #detail .placeholder{color:var(--faint);font-family:ui-sans-serif,system-ui,sans-serif;font-size:14px}
+  #detail .dname{font-size:23px;font-weight:600;margin:0 0 6px}
+  #detail .dera{display:inline-flex;align-items:center;gap:7px;font-family:ui-sans-serif,system-ui,sans-serif;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  #detail .dera .sw{width:11px;height:11px;border-radius:50%}
+  #detail .dwhat{font-size:15.5px;color:#e9e1d3;margin:0 0 14px}
+  #detail .blab{font-family:ui-sans-serif,system-ui,sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:7px}
+  #detail .chips{display:flex;flex-wrap:wrap;gap:6px}
+  #detail .chip{font-family:ui-sans-serif,system-ui,sans-serif;font-size:12px;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);padding:4px 10px;border-radius:999px}
+
+  footer{border-top:1px solid var(--line);margin-top:30px;padding:24px 20px 60px;text-align:center;color:var(--faint);font-size:13px;font-family:ui-sans-serif,system-ui,sans-serif;line-height:1.7}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav class="topnav">
+    <div class="brand">The Bible in a Year — <span>Map</span></div>
+    <a class="navbtn" href="index.html">← Back to the Books</a>
+  </nav>
+</div>
+
+<header class="hero">
+  <div class="eyebrow">The Biblical World</div>
+  <h1>Where It All Happened</h1>
+  <p>A map of the world of the Bible, from Abraham's Ur to Paul's Rome. Toggle the eras on and off, trace the great journeys, and click any place to see what happened there and which books tell its story.</p>
+</header>
+
+<div class="wrap">
+  <div class="layout">
+    <!-- MAP -->
+    <div class="mapcard">
+      <div class="mapwrap" id="mapwrap">
+        <svg class="map" id="svg" viewBox="0 0 1000 660" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Map of the biblical world">
+          <defs>
+            <linearGradient id="landgrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#332d24"/>
+              <stop offset="1" stop-color="#272219"/>
+            </linearGradient>
+          </defs>
+
+          <!-- ===== LAND MASSES (stylized) ===== -->
+          <!-- Italy -->
+          <path class="land" d="M112,70 C150,58 170,92 152,138 C144,176 178,196 168,220 C150,210 128,172 120,140 C112,112 98,90 112,70 Z"/>
+          <!-- Greece / Balkans -->
+          <path class="land" d="M300,108 C360,84 432,90 452,132 C470,172 432,210 402,236 C362,226 350,250 336,234 C346,206 320,200 322,176 C312,150 286,134 300,108 Z"/>
+          <!-- Asia Minor (Anatolia) -->
+          <path class="land" d="M452,150 C520,108 642,106 706,140 C742,160 746,206 712,236 C642,262 540,256 470,242 C440,226 432,180 452,150 Z"/>
+          <!-- North Mesopotamia / Armenia -->
+          <path class="land" d="M700,150 C782,118 902,128 952,180 C978,216 962,272 936,302 C870,302 770,276 716,246 C696,210 690,176 700,150 Z"/>
+          <!-- Levant + Arabia (big SE landmass) -->
+          <path class="land" d="M642,300 C690,288 722,300 742,330 C802,360 902,360 952,402 C978,462 962,562 900,622 C800,652 678,646 640,602 C614,560 620,470 626,430 C630,388 616,338 642,300 Z"/>
+          <!-- Egypt / Africa (SW), joined to Levant by Sinai -->
+          <path class="land" d="M440,438 C470,408 520,404 560,409 C600,407 616,420 612,452 C606,470 590,470 576,460 C560,500 566,560 540,612 C500,648 450,642 440,600 C424,540 430,480 440,438 Z"/>
+
+          <!-- Inland seas -->
+          <ellipse class="inlandsea" cx="645" cy="347" rx="7" ry="9"/>      <!-- Sea of Galilee -->
+          <ellipse class="inlandsea" cx="640" cy="392" rx="5" ry="12"/>     <!-- Dead Sea -->
+
+          <!-- Rivers -->
+          <path class="river" d="M576,558 C572,520 560,478 559,440 C558,422 560,410 563,406"/>            <!-- Nile -->
+          <path class="river" d="M716,182 C760,232 802,300 838,357 C860,386 874,402 884,420"/>          <!-- Euphrates -->
+          <path class="river" d="M772,176 C802,222 826,292 850,352 C866,382 878,400 888,418"/>          <!-- Tigris -->
+          <path class="river" d="M645,347 C643,360 641,376 640,392"/>                                    <!-- Jordan -->
+
+          <!-- Sea labels -->
+          <text class="water-label" x="300" y="338" text-anchor="middle">Mediterranean Sea</text>
+          <text class="water-label sm" x="660" y="80" text-anchor="middle">Black Sea</text>
+          <text class="water-label sm" x="450" y="252" text-anchor="middle" transform="rotate(-66 450 252)">Aegean</text>
+          <text class="water-label sm" x="600" y="540" text-anchor="middle" transform="rotate(64 600 540)">Red Sea</text>
+          <text class="water-label sm" x="930" y="452" text-anchor="middle" transform="rotate(48 930 452)">Persian Gulf</text>
+
+          <!-- Region labels -->
+          <text class="water-label sm" x="150" y="250" text-anchor="middle" style="fill:#6a5f4c">ITALY</text>
+          <text class="water-label sm" x="380" y="160" text-anchor="middle" style="fill:#6a5f4c">GREECE</text>
+          <text class="water-label sm" x="560" y="180" text-anchor="middle" style="fill:#6a5f4c">ASIA MINOR</text>
+          <text class="water-label sm" x="800" y="330" text-anchor="middle" style="fill:#6a5f4c">MESOPOTAMIA</text>
+          <text class="water-label sm" x="820" y="520" text-anchor="middle" style="fill:#6a5f4c">ARABIA</text>
+          <text class="water-label sm" x="505" y="560" text-anchor="middle" style="fill:#6a5f4c">EGYPT</text>
+
+          <g id="routes"></g>
+          <g id="pins"></g>
+        </svg>
+        <div class="tooltip" id="tip"></div>
+      </div>
+    </div>
+
+    <!-- SIDE PANEL -->
+    <div class="side">
+      <div class="box" id="detail">
+        <div class="placeholder">📍 Click any location on the map to see what happened there and which books tell its story. Hover to see a name.</div>
+      </div>
+
+      <div class="box">
+        <h2>Eras — tap to toggle</h2>
+        <div id="legend"></div>
+        <div class="divider"></div>
+        <h2 style="margin-top:4px">Journeys</h2>
+        <div id="routelegend"></div>
+        <div class="smallbtns">
+          <button class="sbtn" id="labelsBtn">Show all labels</button>
+          <button class="sbtn" id="resetBtn">Reset view</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Positions are approximate and stylized for clarity — this is an illustrative map, not a survey-accurate one. Dates and identifications of ancient sites are debated.
+</footer>
+
+<script>
+const MAP_ERAS = [
+  {id:'patriarchs', name:'Patriarchs', color:'#d4a24c'},
+  {id:'exodusconq', name:'Exodus & Conquest', color:'#cf7d4a'},
+  {id:'kingdom',    name:'The Kingdom', color:'#6f9bd1'},
+  {id:'exile',      name:'Exile & Return', color:'#b06fcf'},
+  {id:'gospels',    name:'Life of Jesus', color:'#5fb09a'},
+  {id:'church',     name:'Early Church', color:'#d76b6b'}
+];
+const ERA_COLOR = Object.fromEntries(MAP_ERAS.map(e=>[e.id,e.color]));
+const ERA_NAME  = Object.fromEntries(MAP_ERAS.map(e=>[e.id,e.name]));
+
+// la = always-show label; lr='end' anchors label to the left of the dot; ldx/ldy nudge label
+const LOCATIONS = [
+  // Patriarchs
+  {n:"Ur",            era:"patriarchs", x:874, y:402, la:1, lr:'end', what:"Abraham's birthplace — a great Sumerian city. From here he set out for Canaan in obedience to God's call.", books:["Genesis"]},
+  {n:"Haran",         era:"patriarchs", x:719, y:234, la:1, what:"Way-station where Abraham's family settled en route to Canaan; later the place of Jacob's long exile with Laban.", books:["Genesis"]},
+  {n:"Shechem",       era:"patriarchs", x:637, y:360, what:"The first site Abraham reached in Canaan, where God promised the land to his descendants.", books:["Genesis","Joshua"]},
+  {n:"Hebron",        era:"patriarchs", x:633, y:388, la:1, ldy:13, what:"Home and burial place of Abraham, Isaac, and Jacob (the cave of Machpelah).", books:["Genesis"]},
+  {n:"Beersheba",     era:"patriarchs", x:627, y:400, what:"Southern frontier home of the patriarchs — 'from Dan to Beersheba' marked Israel's full extent.", books:["Genesis"]},
+
+  // Exodus & Conquest
+  {n:"Goshen (Egypt)",era:"exodusconq", x:563, y:406, la:1, lr:'end', what:"Where Jacob's family settled and Israel multiplied — then was enslaved. The Exodus began here.", books:["Genesis","Exodus"]},
+  {n:"Memphis",       era:"exodusconq", x:549, y:433, what:"Major Egyptian royal city near the events of Moses and the plagues.", books:["Exodus","Jeremiah"]},
+  {n:"Thebes",        era:"exodusconq", x:579, y:551, la:1, what:"Egypt's great southern capital ('No-Amon'), a symbol of imperial might in the prophets.", books:["Nahum","Jeremiah"]},
+  {n:"Red Sea crossing",era:"exodusconq", x:577, y:443, what:"Israel escaped Pharaoh's pursuing army through the parted sea.", books:["Exodus"]},
+  {n:"Mount Sinai",   era:"exodusconq", x:609, y:471, la:1, what:"Where Israel received the Law and entered into covenant with God.", books:["Exodus","Leviticus","Numbers","Deuteronomy"]},
+  {n:"Kadesh-barnea", era:"exodusconq", x:620, y:409, what:"Wilderness base from which the spies were sent — and where Israel refused to enter the land, beginning 40 years of wandering.", books:["Numbers","Deuteronomy"]},
+  {n:"Jericho",       era:"exodusconq", x:641, y:376, what:"The first Canaanite city to fall as Israel crossed the Jordan into the promised land.", books:["Joshua"]},
+  {n:"Shiloh",        era:"exodusconq", x:638, y:371, what:"Home of the tabernacle through the era of the judges and young Samuel.", books:["Joshua","Judges","1 Samuel"]},
+
+  // Kingdom
+  {n:"Jerusalem",     era:"kingdom",    x:636, y:379, la:1, ldx:9, ldy:-2, what:"David's capital and the site of Solomon's temple; later the city of Jesus' death and resurrection and the birthplace of the church. It touches nearly every era of the story.", books:["2 Samuel","1 Kings","Psalms","Gospels","Acts"]},
+  {n:"Bethlehem",     era:"kingdom",    x:635, y:386, what:"Birthplace of King David — and, centuries later, of Jesus.", books:["Ruth","1 Samuel","Micah","Matthew","Luke"]},
+  {n:"Samaria",       era:"kingdom",    x:634, y:366, what:"Capital of the northern kingdom of Israel, destroyed by Assyria in 722 BC.", books:["1 Kings","2 Kings","Hosea","Amos"]},
+  {n:"Dan",           era:"kingdom",    x:645, y:341, what:"Israel's northern limit; site of one of Jeroboam's golden-calf shrines.", books:["Judges","1 Kings"]},
+  {n:"Bethel",        era:"kingdom",    x:637, y:374, what:"Ancient worship site and the southern rival calf-shrine of the divided kingdom.", books:["Genesis","1 Kings","Amos"]},
+  {n:"Gath",          era:"kingdom",    x:628, y:383, what:"Philistine stronghold — home of the giant Goliath.", books:["1 Samuel"]},
+
+  // Exile & Return
+  {n:"Nineveh",       era:"exile",      x:810, y:249, la:1, ldy:-4, what:"Capital of the Assyrian empire. Jonah preached repentance here; Nahum foretold its fall in 612 BC.", books:["Jonah","Nahum"]},
+  {n:"Babylon",       era:"exile",      x:838, y:357, la:1, what:"Nebuchadnezzar's imperial capital, where Judah was carried into exile after Jerusalem fell in 586 BC.", books:["2 Kings","Jeremiah","Ezekiel","Daniel","Psalms"]},
+  {n:"Susa",          era:"exile",      x:922, y:367, la:1, lr:'end', what:"Persian royal capital — the setting of Esther and the place Nehemiah served the king.", books:["Esther","Nehemiah","Daniel"]},
+  {n:"Damascus",      era:"exile",      x:660, y:330, la:1, what:"Capital of Aram (Syria), a perennial rival of Israel — and the road of Paul's dramatic conversion.", books:["1 Kings","2 Kings","Acts"]},
+  {n:"Tyre",          era:"exile",      x:635, y:337, what:"Wealthy Phoenician port, a frequent subject of prophetic judgment oracles.", books:["Ezekiel","Isaiah"]},
+
+  // Life of Jesus
+  {n:"Nazareth",      era:"gospels",    x:638, y:354, what:"The Galilean town where Jesus grew up.", books:["Matthew","Luke"]},
+  {n:"Capernaum",     era:"gospels",    x:646, y:347, what:"Jesus' home base for much of his ministry, on the shore of the Sea of Galilee.", books:["Matthew","Mark","Luke"]},
+
+  // Early Church
+  {n:"Antioch",       era:"church",     x:657, y:253, la:1, what:"Where followers of Jesus were first called 'Christians' — and the launchpad of Paul's missionary journeys.", books:["Acts"]},
+  {n:"Tarsus",        era:"church",     x:629, y:233, la:1, lr:'end', what:"The apostle Paul's hometown.", books:["Acts"]},
+  {n:"Cyprus",        era:"church",     x:575, y:294, what:"First stop of Paul's first missionary journey.", books:["Acts"]},
+  {n:"Ephesus",       era:"church",     x:464, y:204, la:1, lr:'end', what:"Great city of Asia Minor where Paul ministered for years; one of the seven churches of Revelation.", books:["Acts","Ephesians","1 Timothy","Revelation"]},
+  {n:"Patmos",        era:"church",     x:446, y:222, what:"The island where John, in exile, received the visions of Revelation.", books:["Revelation"]},
+  {n:"Philippi",      era:"church",     x:397, y:117, la:1, what:"The first church Paul founded on European soil.", books:["Acts","Philippians"]},
+  {n:"Thessalonica",  era:"church",     x:367, y:127, la:1, lr:'end', what:"Macedonian city Paul evangelized; recipient of two of his earliest surviving letters.", books:["Acts","1 Thessalonians","2 Thessalonians"]},
+  {n:"Athens",        era:"church",     x:384, y:206, la:1, ldy:13, what:"Where Paul preached at the Areopagus to the philosophers of Greece.", books:["Acts"]},
+  {n:"Corinth",       era:"church",     x:367, y:206, la:1, lr:'end', ldy:-3, what:"Wealthy, freewheeling port city; home of a turbulent church Paul wrote to twice.", books:["Acts","1 Corinthians","2 Corinthians"]},
+  {n:"Crete",         era:"church",     x:408, y:290, what:"Island where Titus was left to organize churches; Paul's voyage to Rome sailed past it.", books:["Titus","Acts"]},
+  {n:"Malta",         era:"church",     x:182, y:262, la:1, what:"Where Paul was shipwrecked on his journey to Rome.", books:["Acts"]},
+  {n:"Rome",          era:"church",     x:139, y:91,  la:1, what:"Capital of the empire — the destination of Paul's great letter, the place of his final imprisonment, and the gospel's reach to the center of the known world.", books:["Acts","Romans","Philippians","2 Timothy"]}
+];
+
+const ROUTES = [
+  {id:'exodus', name:'The Exodus', color:'#cf7d4a',
+   pts:[[563,406],[572,426],[578,444],[596,462],[609,471],[614,440],[620,409],[632,392],[641,376]]},
+  {id:'paul', name:"Paul's journeys", color:'#d76b6b',
+   pts:[[657,253],[575,294],[464,204],[470,182],[397,117],[367,127],[384,206],[367,206],[464,204],[636,379],[657,253]]},
+  {id:'rome', name:'Voyage to Rome', color:'#6f9bd1',
+   pts:[[636,379],[520,332],[408,290],[300,282],[182,262],[150,150],[139,91]]}
+];
+
+const svg = document.getElementById('svg');
+const SVGNS = "http://www.w3.org/2000/svg";
+const pinsG = document.getElementById('pins');
+const routesG = document.getElementById('routes');
+const tip = document.getElementById('tip');
+const mapwrap = document.getElementById('mapwrap');
+const eraOn = Object.fromEntries(MAP_ERAS.map(e=>[e.id,true]));
+const routeOn = Object.fromEntries(ROUTES.map(r=>[r.id,true]));
+let labelsAll = false;
+let selected = null;
+
+function el(name,attrs){const e=document.createElementNS(SVGNS,name);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+
+// ---- routes ----
+ROUTES.forEach(r=>{
+  const d = r.pts.map((p,i)=>(i?'L':'M')+p[0]+' '+p[1]).join(' ');
+  const path = el('path',{d, class:'route', stroke:r.color, 'data-route':r.id});
+  routesG.appendChild(path);
+  // start & end markers
+  const s=r.pts[0], e=r.pts[r.pts.length-1];
+  [s,e].forEach((pt,idx)=>{
+    const c=el('circle',{cx:pt[0],cy:pt[1],r:3.4,fill:r.color,class:'routedot','data-route':r.id,stroke:'#0d0c0a','stroke-width':1});
+    routesG.appendChild(c);
+  });
+});
+
+// ---- pins ----
+LOCATIONS.forEach((loc,i)=>{
+  const g = el('g',{class:'pin','data-era':loc.era,'data-i':i});
+  g.appendChild(el('circle',{class:'halo',cx:loc.x,cy:loc.y,r:14,fill:ERA_COLOR[loc.era]}));
+  g.appendChild(el('circle',{class:'dot',cx:loc.x,cy:loc.y,r:5,fill:ERA_COLOR[loc.era]}));
+  const anchor = loc.lr==='end' ? 'end' : 'start';
+  const dx = (loc.ldx!=null?loc.ldx:(loc.lr==='end'?-9:9));
+  const dy = (loc.ldy!=null?loc.ldy:3);
+  const t = el('text',{class:'plabel'+(loc.la?'':' hide'),x:loc.x+dx,y:loc.y+dy,'text-anchor':anchor});
+  t.textContent = loc.n;
+  g.appendChild(t);
+  g._label = t; g._loc = loc;
+  g.addEventListener('mouseenter',()=>showTip(loc));
+  g.addEventListener('mousemove',()=>showTip(loc));
+  g.addEventListener('mouseleave',hideTip);
+  g.addEventListener('click',()=>select(i));
+  pinsG.appendChild(g);
+});
+
+// ---- tooltip ----
+function showTip(loc){
+  const rect = svg.getBoundingClientRect();
+  const wrapRect = mapwrap.getBoundingClientRect();
+  const sx = rect.left + (loc.x/1000)*rect.width - wrapRect.left;
+  const sy = rect.top  + (loc.y/660)*rect.height - wrapRect.top;
+  tip.textContent = loc.n;
+  tip.style.left = sx+'px';
+  tip.style.top  = sy+'px';
+  tip.classList.add('show');
+}
+function hideTip(){tip.classList.remove('show');}
+
+// ---- selection / detail ----
+function select(i){
+  selected = i;
+  document.querySelectorAll('.pin').forEach(p=>p.classList.toggle('sel',+p.dataset.i===i));
+  const loc = LOCATIONS[i];
+  const chips = loc.books.map(b=>`<span class="chip">${b}</span>`).join('');
+  document.getElementById('detail').innerHTML =
+    `<div class="dname">${loc.n}</div>
+     <div class="dera"><span class="sw" style="background:${ERA_COLOR[loc.era]}"></span>${ERA_NAME[loc.era]}</div>
+     <p class="dwhat">${loc.what}</p>
+     <div class="blab">Where to read</div>
+     <div class="chips">${chips}</div>`;
+}
+
+// ---- legend (eras) ----
+const legend = document.getElementById('legend');
+MAP_ERAS.forEach(e=>{
+  const count = LOCATIONS.filter(l=>l.era===e.id).length;
+  const b=document.createElement('button');
+  b.className='legrow';
+  b.innerHTML=`<span class="sw" style="background:${e.color}"></span><span class="lname">${e.name}</span><span class="cnt">${count}</span>`;
+  b.addEventListener('click',()=>{
+    eraOn[e.id]=!eraOn[e.id];
+    b.classList.toggle('off',!eraOn[e.id]);
+    applyFilters();
+  });
+  legend.appendChild(b);
+});
+
+// ---- legend (routes) ----
+const routelegend = document.getElementById('routelegend');
+ROUTES.forEach(r=>{
+  const b=document.createElement('button');
+  b.className='legrow';
+  b.innerHTML=`<span class="rsw" style="border-top-color:${r.color}"></span><span class="lname">${r.name}</span>`;
+  b.addEventListener('click',()=>{
+    routeOn[r.id]=!routeOn[r.id];
+    b.classList.toggle('off',!routeOn[r.id]);
+    applyFilters();
+  });
+  routelegend.appendChild(b);
+});
+
+function applyFilters(){
+  document.querySelectorAll('.pin').forEach(p=>{
+    const on = eraOn[p.dataset.era];
+    p.classList.toggle('dim',!on);
+    // hide label if era off
+    p._label.style.display = (!on) ? 'none' : ((labelsAll || p._loc.la) ? '' : 'none');
+  });
+  document.querySelectorAll('[data-route]').forEach(node=>{
+    node.classList.toggle('hidden',!routeOn[node.dataset.route]);
+  });
+}
+
+// ---- buttons ----
+document.getElementById('labelsBtn').addEventListener('click',function(){
+  labelsAll=!labelsAll;
+  this.classList.toggle('active',labelsAll);
+  this.textContent = labelsAll?'Hide extra labels':'Show all labels';
+  applyFilters();
+});
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  MAP_ERAS.forEach(e=>eraOn[e.id]=true);
+  ROUTES.forEach(r=>routeOn[r.id]=true);
+  labelsAll=false;
+  document.querySelectorAll('.legrow').forEach(b=>b.classList.remove('off'));
+  const lb=document.getElementById('labelsBtn'); lb.classList.remove('active'); lb.textContent='Show all labels';
+  selected=null;
+  document.querySelectorAll('.pin').forEach(p=>p.classList.remove('sel'));
+  document.getElementById('detail').innerHTML='<div class="placeholder">📍 Click any location on the map to see what happened there and which books tell its story. Hover to see a name.</div>';
+  applyFilters();
+});
+
+applyFilters();
+</script>
+</body>
+</html>
