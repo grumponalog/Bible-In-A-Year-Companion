@@ -1,0 +1,23 @@
+# Packaged archives (don't commit build/zip artifacts)
+*.zip
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Node (only if you later add tooling)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Logs and temp
+*.log
+.cache/
+tmp/
